@@ -5,10 +5,42 @@ const LANE_HEIGHT = 120
 const LANE_WIDTH = 1000
 const VEHICLE_SPEED_BASE = 2
 
-const Highway = ({ lanes, trafficIntensity, gameMode }) => {
+// Helper function to create vehicle sprites
+const createVehicleSprite = (vehicleType) => {
+  const vehicleTypes = {
+    sport: { color: 0x3b82f6, width: 35, height: 20 },
+    car: { color: 0x10b981, width: 40, height: 24 },
+    truck: { color: 0xf59e0b, width: 50, height: 28 },
+    bus: { color: 0x8b5cf6, width: 60, height: 28 },
+    ambulance: { color: 0xef4444, width: 40, height: 24 }
+  }
+
+  const config = vehicleTypes[vehicleType] || vehicleTypes.car
+  const vehicle = new PIXI.Graphics()
+
+  // Draw vehicle body
+  vehicle.beginFill(config.color)
+  vehicle.drawRoundedRect(0, -config.height / 2, config.width, config.height, 4)
+  vehicle.endFill()
+
+  // Add windows
+  vehicle.beginFill(0x1a202c, 0.6)
+  vehicle.drawRoundedRect(5, -config.height / 2 + 4, config.width - 10, config.height - 8, 2)
+  vehicle.endFill()
+
+  // Add headlights
+  vehicle.beginFill(0xffffff)
+  vehicle.drawCircle(config.width - 5, -config.height / 2 + 5, 2)
+  vehicle.drawCircle(config.width - 5, config.height / 2 - 5, 2)
+  vehicle.endFill()
+
+  return vehicle
+}
+
+const Highway = ({ lanes, vehicles, trafficIntensity, gameMode }) => {
   const canvasRef = useRef(null)
   const appRef = useRef(null)
-  const vehiclesRef = useRef([])
+  const vehicleSpritesRef = useRef({})
   const lanesContainerRef = useRef([])
 
   useEffect(() => {
@@ -85,18 +117,9 @@ const Highway = ({ lanes, trafficIntensity, gameMode }) => {
         return laneContainer
       })
 
-      // Animation loop
-      app.ticker.add((delta) => {
-        // Update vehicles
-        vehiclesRef.current.forEach((vehicle, index) => {
-          vehicle.sprite.x += vehicle.speed * delta
-
-          // Remove vehicles that have left the screen
-          if (vehicle.sprite.x > LANE_WIDTH + 100) {
-            vehicle.sprite.destroy()
-            vehiclesRef.current.splice(index, 1)
-          }
-        })
+      // Animation loop (empty for now, vehicles updated via useEffect below)
+      app.ticker.add(() => {
+        // Ticker keeps running for potential animations
       })
     })()
 
@@ -105,6 +128,41 @@ const Highway = ({ lanes, trafficIntensity, gameMode }) => {
       if (app) app.destroy(true, { children: true, texture: true })
     }
   }, [])
+
+  // Update vehicles from backend data
+  useEffect(() => {
+    if (!appRef.current || !lanesContainerRef.current.length) return
+
+    const app = appRef.current
+
+    // Remove vehicles that no longer exist
+    Object.keys(vehicleSpritesRef.current).forEach(vehicleId => {
+      if (!vehicles.find(v => v.id === vehicleId)) {
+        vehicleSpritesRef.current[vehicleId].destroy()
+        delete vehicleSpritesRef.current[vehicleId]
+      }
+    })
+
+    // Add or update vehicles
+    vehicles.forEach(vehicle => {
+      const laneIndex = vehicle.laneId === 'replica-1' ? 0 : vehicle.laneId === 'replica-2' ? 1 : 2
+
+      if (!vehicleSpritesRef.current[vehicle.id]) {
+        // Create new vehicle sprite
+        const vehicleSprite = createVehicleSprite(vehicle.type)
+
+        if (lanesContainerRef.current[laneIndex]) {
+          lanesContainerRef.current[laneIndex].addChild(vehicleSprite)
+          vehicleSpritesRef.current[vehicle.id] = vehicleSprite
+        }
+      }
+
+      // Update position (convert 0-1 position to pixel position)
+      if (vehicleSpritesRef.current[vehicle.id]) {
+        vehicleSpritesRef.current[vehicle.id].x = vehicle.position * LANE_WIDTH
+      }
+    })
+  }, [vehicles])
 
   // Update lane statuses
   useEffect(() => {
@@ -128,72 +186,12 @@ const Highway = ({ lanes, trafficIntensity, gameMode }) => {
     })
   }, [lanes])
 
-  // Spawn vehicles based on traffic intensity
-  useEffect(() => {
-    if (!appRef.current) return
-
-    const spawnInterval = setInterval(() => {
-      spawnRandomVehicle()
-    }, Math.max(500, 3000 - (trafficIntensity * 25)))
-
-    return () => clearInterval(spawnInterval)
-  }, [trafficIntensity])
-
-  const spawnRandomVehicle = () => {
-    if (!appRef.current || !lanesContainerRef.current.length) return
-
-    const vehicleTypes = [
-      { type: 'car', color: 0x3b82f6, width: 40, height: 24, speed: 3 },
-      { type: 'truck', color: 0xf59e0b, width: 50, height: 28, speed: 1.5 },
-      { type: 'sport', color: 0x8b5cf6, width: 35, height: 20, speed: 5 }
-    ]
-
-    const randomType = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)]
-    const randomLane = Math.floor(Math.random() * 3)
-
-    spawnVehicle(randomLane, randomType)
-  }
-
-  const spawnVehicle = (laneIndex, vehicleType) => {
-    if (!appRef.current || !lanesContainerRef.current[laneIndex]) return
-
-    const vehicle = new PIXI.Graphics()
-
-    // Draw vehicle body
-    vehicle.beginFill(vehicleType.color)
-    vehicle.drawRoundedRect(0, -vehicleType.height / 2, vehicleType.width, vehicleType.height, 4)
-    vehicle.endFill()
-
-    // Add windows
-    vehicle.beginFill(0x1a202c, 0.6)
-    vehicle.drawRoundedRect(5, -vehicleType.height / 2 + 4, vehicleType.width - 10, vehicleType.height - 8, 2)
-    vehicle.endFill()
-
-    // Add headlights
-    vehicle.beginFill(0xffffff)
-    vehicle.drawCircle(vehicleType.width - 5, -vehicleType.height / 2 + 5, 2)
-    vehicle.drawCircle(vehicleType.width - 5, vehicleType.height / 2 - 5, 2)
-    vehicle.endFill()
-
-    vehicle.x = -vehicleType.width - 20
-    vehicle.y = 0
-
-    lanesContainerRef.current[laneIndex].addChild(vehicle)
-
-    vehiclesRef.current.push({
-      sprite: vehicle,
-      speed: vehicleType.speed * VEHICLE_SPEED_BASE,
-      type: vehicleType.type,
-      lane: laneIndex
-    })
-  }
-
   return (
     <div className="relative">
       <div className="absolute top-4 left-4 glass rounded-lg px-4 py-2 z-10">
         <div className="text-xs text-gray-400">Highway Traffic</div>
         <div className="text-lg font-semibold text-white">
-          {vehiclesRef.current.length} vehicles
+          {vehicles?.length || 0} vehicles
         </div>
       </div>
       <div ref={canvasRef} className="rounded-lg overflow-hidden" />

@@ -19,6 +19,7 @@ function App() {
     { id: 'replica-2', status: 'active', load: 0, requestsPerSec: 0 },
     { id: 'replica-3', status: 'closed', load: 0, requestsPerSec: 0 }
   ])
+  const [vehicles, setVehicles] = useState([])
 
   // WebSocket connection for real-time updates
   useEffect(() => {
@@ -35,6 +36,8 @@ function App() {
         setMetrics(data.metrics)
       } else if (data.type === 'lanes') {
         setLanes(data.lanes)
+      } else if (data.type === 'vehicles') {
+        setVehicles(data.vehicles)
       }
     }
 
@@ -108,6 +111,7 @@ function App() {
         <div className="glass rounded-2xl p-6">
           <Highway
             lanes={lanes}
+            vehicles={vehicles}
             trafficIntensity={trafficIntensity}
             gameMode={gameMode}
           />

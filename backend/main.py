@@ -104,6 +104,7 @@ async def broadcast_update():
 
     metrics = traffic_manager.get_metrics()
     lanes = traffic_manager.get_lanes()
+    vehicles = list(traffic_manager.vehicles.values())
 
     message_metrics = {
         "type": "metrics",
@@ -113,12 +114,17 @@ async def broadcast_update():
         "type": "lanes",
         "lanes": [lane.model_dump() for lane in lanes]
     }
+    message_vehicles = {
+        "type": "vehicles",
+        "vehicles": [v.model_dump() for v in vehicles]
+    }
 
     # Send to all connections
     for connection in active_connections[:]:
         try:
             await connection.send_json(message_metrics)
             await connection.send_json(message_lanes)
+            await connection.send_json(message_vehicles)
         except:
             active_connections.remove(connection)
 
