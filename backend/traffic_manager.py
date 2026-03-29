@@ -171,6 +171,8 @@ class TrafficManager:
                 if chunk.choices and chunk.choices[0].delta.content:
                     token_count += 1
                     vehicle.generatedTokens = token_count
+                    # Update position (0.0 to 1.0 based on progress)
+                    vehicle.position = min(1.0, token_count / max_tokens)
 
             # Update metrics
             latency = time.time() - start_time
