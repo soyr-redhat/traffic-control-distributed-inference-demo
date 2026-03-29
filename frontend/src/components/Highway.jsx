@@ -41,6 +41,7 @@ const Highway = ({ lanes, vehicles, trafficIntensity, gameMode }) => {
   const canvasRef = useRef(null)
   const appRef = useRef(null)
   const vehicleSpritesRef = useRef({})
+  const vehicleTargetsRef = useRef({}) // Store target positions for smooth animation
   const lanesContainerRef = useRef([])
 
   useEffect(() => {
@@ -117,9 +118,18 @@ const Highway = ({ lanes, vehicles, trafficIntensity, gameMode }) => {
         return laneContainer
       })
 
-      // Animation loop (empty for now, vehicles updated via useEffect below)
+      // Animation loop - smooth interpolation
       app.ticker.add(() => {
-        // Ticker keeps running for potential animations
+        // Smoothly move vehicles toward their target positions
+        Object.keys(vehicleSpritesRef.current).forEach(vehicleId => {
+          const sprite = vehicleSpritesRef.current[vehicleId]
+          const target = vehicleTargetsRef.current[vehicleId]
+
+          if (sprite && target !== undefined) {
+            // Smooth interpolation (lerp) - 0.2 is the smoothing factor
+            sprite.x += (target - sprite.x) * 0.2
+          }
+        })
       })
     })()
 
@@ -140,16 +150,19 @@ const Highway = ({ lanes, vehicles, trafficIntensity, gameMode }) => {
       if (!vehicles.find(v => v.id === vehicleId)) {
         vehicleSpritesRef.current[vehicleId].destroy()
         delete vehicleSpritesRef.current[vehicleId]
+        delete vehicleTargetsRef.current[vehicleId]
       }
     })
 
     // Add or update vehicles
     vehicles.forEach(vehicle => {
       const laneIndex = vehicle.laneId === 'replica-1' ? 0 : vehicle.laneId === 'replica-2' ? 1 : 2
+      const targetPosition = vehicle.position * LANE_WIDTH
 
       if (!vehicleSpritesRef.current[vehicle.id]) {
         // Create new vehicle sprite
         const vehicleSprite = createVehicleSprite(vehicle.type)
+        vehicleSprite.x = 0 // Start at beginning
 
         if (lanesContainerRef.current[laneIndex]) {
           lanesContainerRef.current[laneIndex].addChild(vehicleSprite)
@@ -157,10 +170,8 @@ const Highway = ({ lanes, vehicles, trafficIntensity, gameMode }) => {
         }
       }
 
-      // Update position (convert 0-1 position to pixel position)
-      if (vehicleSpritesRef.current[vehicle.id]) {
-        vehicleSpritesRef.current[vehicle.id].x = vehicle.position * LANE_WIDTH
-      }
+      // Update target position (animation loop will smoothly move to it)
+      vehicleTargetsRef.current[vehicle.id] = targetPosition
     })
   }, [vehicles])
 

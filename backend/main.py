@@ -167,7 +167,7 @@ async def run_game_mode(mode: GameMode):
 async def metrics_updater():
     """Background task to update metrics"""
     while True:
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)  # Update 10 times per second for smooth movement
         traffic_manager.update_metrics()
         await broadcast_update()
 
