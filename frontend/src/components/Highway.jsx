@@ -14,90 +14,95 @@ const Highway = ({ lanes, trafficIntensity, gameMode }) => {
   useEffect(() => {
     if (!canvasRef.current) return
 
-    // Initialize PixiJS application
-    const app = new PIXI.Application({
-      width: 1200,
-      height: 600,
-      backgroundColor: 0x2d3748,
-      antialias: true
-    })
+    // Initialize PixiJS application (async in v8)
+    let app
 
-    canvasRef.current.appendChild(app.view)
-    appRef.current = app
+    ;(async () => {
+      app = new PIXI.Application()
+      await app.init({
+        width: 1200,
+        height: 600,
+        backgroundColor: 0x2d3748,
+        antialias: true
+      })
 
-    // Create highway background
-    const background = new PIXI.Graphics()
+      canvasRef.current.appendChild(app.canvas)
+      appRef.current = app
+
+      // Create highway background
+      const background = new PIXI.Graphics()
     background.beginFill(0x1a202c)
     background.drawRect(0, 0, 1200, 600)
-    background.endFill()
-    app.stage.addChild(background)
+      background.endFill()
+      app.stage.addChild(background)
 
-    // Create lanes
-    const laneYPositions = [80, 200, 320, 440]
-    const laneColors = [0x3b82f6, 0x10b981, 0xf59e0b, 0x8b5cf6]
+      // Create lanes
+      const laneYPositions = [80, 200, 320, 440]
+      const laneColors = [0x3b82f6, 0x10b981, 0xf59e0b, 0x8b5cf6]
 
-    lanesContainerRef.current = laneYPositions.map((y, index) => {
-      const laneContainer = new PIXI.Container()
-      laneContainer.y = y
+      lanesContainerRef.current = laneYPositions.map((y, index) => {
+        const laneContainer = new PIXI.Container()
+        laneContainer.y = y
 
-      // Lane background
-      const laneGraphic = new PIXI.Graphics()
-      laneGraphic.beginFill(0x374151, 0.3)
-      laneGraphic.drawRoundedRect(20, -50, LANE_WIDTH, 100, 10)
-      laneGraphic.endFill()
+        // Lane background
+        const laneGraphic = new PIXI.Graphics()
+        laneGraphic.beginFill(0x374151, 0.3)
+        laneGraphic.drawRoundedRect(20, -50, LANE_WIDTH, 100, 10)
+        laneGraphic.endFill()
 
-      // Lane markers (dashed lines)
-      for (let x = 20; x < LANE_WIDTH; x += 60) {
-        const dash = new PIXI.Graphics()
-        dash.beginFill(0x9ca3af, 0.3)
-        dash.drawRect(x, 0, 40, 2)
-        dash.endFill()
-        laneGraphic.addChild(dash)
-      }
-
-      laneContainer.addChild(laneGraphic)
-
-      // Lane label
-      const labelText = index === 3 ? 'HOV (Cache)' : `Lane ${index + 1}`
-      const label = new PIXI.Text(labelText, {
-        fontFamily: 'Red Hat Text',
-        fontSize: 14,
-        fill: 0xffffff,
-        fontWeight: '600'
-      })
-      label.x = 1050
-      label.y = -10
-      laneContainer.addChild(label)
-
-      // Status indicator
-      const statusCircle = new PIXI.Graphics()
-      statusCircle.beginFill(index < 2 ? 0x10b981 : 0x6b7280)
-      statusCircle.drawCircle(1100, 0, 6)
-      statusCircle.endFill()
-      laneContainer.addChild(statusCircle)
-      laneContainer.statusCircle = statusCircle
-
-      app.stage.addChild(laneContainer)
-      return laneContainer
-    })
-
-    // Animation loop
-    app.ticker.add((delta) => {
-      // Update vehicles
-      vehiclesRef.current.forEach((vehicle, index) => {
-        vehicle.sprite.x += vehicle.speed * delta
-
-        // Remove vehicles that have left the screen
-        if (vehicle.sprite.x > LANE_WIDTH + 100) {
-          vehicle.sprite.destroy()
-          vehiclesRef.current.splice(index, 1)
+        // Lane markers (dashed lines)
+        for (let x = 20; x < LANE_WIDTH; x += 60) {
+          const dash = new PIXI.Graphics()
+          dash.beginFill(0x9ca3af, 0.3)
+          dash.drawRect(x, 0, 40, 2)
+          dash.endFill()
+          laneGraphic.addChild(dash)
         }
+
+        laneContainer.addChild(laneGraphic)
+
+        // Lane label
+        const labelText = index === 3 ? 'HOV (Cache)' : `Lane ${index + 1}`
+        const label = new PIXI.Text(labelText, {
+          fontFamily: 'Red Hat Text',
+          fontSize: 14,
+          fill: 0xffffff,
+          fontWeight: '600'
+        })
+        label.x = 1050
+        label.y = -10
+        laneContainer.addChild(label)
+
+        // Status indicator
+        const statusCircle = new PIXI.Graphics()
+        statusCircle.beginFill(index < 2 ? 0x10b981 : 0x6b7280)
+        statusCircle.drawCircle(1100, 0, 6)
+        statusCircle.endFill()
+        laneContainer.addChild(statusCircle)
+        laneContainer.statusCircle = statusCircle
+
+        app.stage.addChild(laneContainer)
+        return laneContainer
       })
-    })
+
+      // Animation loop
+      app.ticker.add((delta) => {
+        // Update vehicles
+        vehiclesRef.current.forEach((vehicle, index) => {
+          vehicle.sprite.x += vehicle.speed * delta
+
+          // Remove vehicles that have left the screen
+          if (vehicle.sprite.x > LANE_WIDTH + 100) {
+            vehicle.sprite.destroy()
+            vehiclesRef.current.splice(index, 1)
+          }
+        })
+      })
+    })()
 
     // Cleanup
     return () => {
-      app.destroy(true, { children: true, texture: true })
+      if (app) app.destroy(true, { children: true, texture: true })
     }
   }, [])
 
