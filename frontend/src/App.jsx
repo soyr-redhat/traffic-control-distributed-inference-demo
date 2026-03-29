@@ -22,10 +22,11 @@ function App() {
 
   // WebSocket connection for real-time updates
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    const wsUrl = apiUrl.replace('http', 'ws')
+    // Use relative WebSocket URL (nginx will proxy it)
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const wsUrl = `${protocol}//${window.location.host}/ws/traffic`
 
-    const ws = new WebSocket(`${wsUrl}/ws/traffic`)
+    const ws = new WebSocket(wsUrl)
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
