@@ -1,0 +1,27 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - VLLM_REPLICA_1_URL=http://host.docker.internal:8001/v1
+      - VLLM_REPLICA_2_URL=http://host.docker.internal:8001/v1
+      - VLLM_REPLICA_3_URL=http://host.docker.internal:8001/v1
+      - MODEL_NAME=RedHatAI/Mistral-Small-24B-Instruct-2501-quantized.w4a16
+    volumes:
+      - ./backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Containerfile
+    ports:
+      - "3000:8080"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_WS_URL=ws://localhost:8000
+    depends_on:
+      - backend

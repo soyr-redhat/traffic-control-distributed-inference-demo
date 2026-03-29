@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: traffic-control
+  labels:
+    app: traffic-control
+    pillar: llms-at-scale

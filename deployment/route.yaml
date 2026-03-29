@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: traffic-control
+  labels:
+    app: traffic-control
+spec:
+  to:
+    kind: Service
+    name: traffic-frontend
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

@@ -1,0 +1,61 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: traffic-backend
+  namespace: traffic-control
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: traffic-frontend
+  namespace: traffic-control
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: traffic-backend
+  namespace: traffic-control
+spec:
+  triggers:
+  - type: ConfigChange
+  - type: GitHub
+    github:
+      secret: github-webhook-secret
+  source:
+    type: Git
+    git:
+      uri: https://github.com/soyr-redhat/traffic-control-distributed-inference-demo.git
+    contextDir: backend
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Containerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: traffic-backend:latest
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: traffic-frontend
+  namespace: traffic-control
+spec:
+  triggers:
+  - type: ConfigChange
+  - type: GitHub
+    github:
+      secret: github-webhook-secret
+  source:
+    type: Git
+    git:
+      uri: https://github.com/soyr-redhat/traffic-control-distributed-inference-demo.git
+    contextDir: frontend
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Containerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: traffic-frontend:latest
