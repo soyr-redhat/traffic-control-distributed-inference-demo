@@ -1,214 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@700;900&family=Red+Hat+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Cyber Terminal Color Palette */
-  --cyber-cyan: #00ffff;
-  --cyber-magenta: #ff00ff;
-  --cyber-green: #00ff41;
-  --cyber-yellow: #ffff00;
-  --cyber-bg: #0a0e27;
-  --cyber-bg-light: #1a1f3a;
-  --cyber-border: #00ffff;
-  --cyber-glow: rgba(0, 255, 255, 0.5);
-
-  /* Typography */
-  --font-display: 'Orbitron', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
-  --font-tech: 'Share Tech Mono', monospace;
-}
-
-* {
-  box-sizing: border-box;
-}
-
 body {
   margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  font-family: var(--font-mono);
-  background: var(--cyber-bg);
-  color: var(--cyber-cyan);
-
-  /* CRT Monitor Effect */
-  position: relative;
+  font-family: 'Red Hat Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0A0A0A;
+  color: #FFFFFF;
 }
 
-/* Scanline overlay */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    transparent 50%,
-    rgba(0, 0, 0, 0.3) 50%
-  );
-  background-size: 100% 4px;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.1;
-  animation: scanlines 10s linear infinite;
-}
-
-/* Subtle vignette */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(
-    circle at center,
-    transparent 0%,
-    rgba(0, 0, 0, 0.3) 100%
-  );
-  pointer-events: none;
-  z-index: 9998;
-}
-
-@keyframes scanlines {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 0 100%;
-  }
+code {
+  font-family: 'JetBrains Mono', source-code-pro, Menlo, Monaco, Consolas, monospace;
 }
 
 #root {
   min-height: 100vh;
-  position: relative;
-  z-index: 1;
 }
 
-/* Custom Scrollbar - Cyber Style */
+/* Red Hat Brand Grid Background */
+.grid-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(rgba(238, 0, 0, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(238, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.grid-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 0%, rgba(238, 0, 0, 0.03), transparent 70%);
+}
+
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--cyber-bg-light);
-  border: 1px solid var(--cyber-border);
+  background: #1a1a1a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--cyber-cyan), var(--cyber-magenta));
-  border: 1px solid var(--cyber-border);
-  box-shadow: 0 0 10px var(--cyber-glow);
+  background: #EE0000;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, var(--cyber-magenta), var(--cyber-cyan));
+  background: #cc0000;
 }
 
-/* Terminal Border Effect */
-.terminal-border {
-  border: 2px solid var(--cyber-cyan);
-  box-shadow:
-    0 0 10px var(--cyber-glow),
-    inset 0 0 10px rgba(0, 255, 255, 0.1);
-  position: relative;
-}
-
-.terminal-border::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(45deg, var(--cyber-cyan), var(--cyber-magenta), var(--cyber-cyan));
-  background-size: 200% 200%;
-  animation: borderGlow 3s ease infinite;
-  z-index: -1;
-  filter: blur(10px);
-  opacity: 0.5;
-}
-
-@keyframes borderGlow {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-/* Glass Morphism - Cyber Edition */
-.cyber-glass {
-  background: rgba(26, 31, 58, 0.7);
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 255, 255, 0.3);
-  box-shadow:
-    0 0 20px rgba(0, 255, 255, 0.1),
-    inset 0 0 20px rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Neon Glow Text */
-.neon-text {
-  text-shadow:
-    0 0 5px var(--cyber-glow),
-    0 0 10px var(--cyber-glow),
-    0 0 20px var(--cyber-glow);
-}
-
-.neon-text-magenta {
-  color: var(--cyber-magenta);
-  text-shadow:
-    0 0 5px rgba(255, 0, 255, 0.5),
-    0 0 10px rgba(255, 0, 255, 0.5),
-    0 0 20px rgba(255, 0, 255, 0.5);
-}
-
-.neon-text-green {
-  color: var(--cyber-green);
-  text-shadow:
-    0 0 5px rgba(0, 255, 65, 0.5),
-    0 0 10px rgba(0, 255, 65, 0.5),
-    0 0 20px rgba(0, 255, 65, 0.5);
-}
-
-/* Glitch Animation */
-@keyframes glitch {
-  0% {
-    transform: translate(0);
-  }
-  20% {
-    transform: translate(-2px, 2px);
-  }
-  40% {
-    transform: translate(-2px, -2px);
-  }
-  60% {
-    transform: translate(2px, 2px);
-  }
-  80% {
-    transform: translate(2px, -2px);
-  }
-  100% {
-    transform: translate(0);
-  }
-}
-
-.glitch:hover {
-  animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
-}
-
-/* Pulse Animation */
-@keyframes pulse-neon {
-  0%, 100% {
-    opacity: 1;
-    box-shadow: 0 0 20px var(--cyber-glow);
-  }
-  50% {
-    opacity: 0.7;
-    box-shadow: 0 0 40px var(--cyber-glow);
-  }
-}
-
-.pulse-neon {
-  animation: pulse-neon 2s ease-in-out infinite;
-}
-
-/* Fade In Animation */
+/* Fade in animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -224,155 +88,10 @@ body::after {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Staggered Fade In */
-.stagger-1 {
-  animation: fadeIn 0.5s ease-out 0.1s both;
-}
-
-.stagger-2 {
-  animation: fadeIn 0.5s ease-out 0.2s both;
-}
-
-.stagger-3 {
-  animation: fadeIn 0.5s ease-out 0.3s both;
-}
-
-/* Line Clamp Utility */
+/* Line clamp utility */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* Grid Background Pattern */
-.grid-bg {
-  background-image:
-    linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 50px 50px;
-}
-
-/* Hexagon Pattern */
-.hex-bg {
-  background-image:
-    repeating-linear-gradient(
-      30deg,
-      rgba(0, 255, 255, 0.05),
-      rgba(0, 255, 255, 0.05) 10px,
-      transparent 10px,
-      transparent 20px
-    ),
-    repeating-linear-gradient(
-      -30deg,
-      rgba(255, 0, 255, 0.05),
-      rgba(255, 0, 255, 0.05) 10px,
-      transparent 10px,
-      transparent 20px
-    );
-}
-
-/* Terminal Cursor Blink */
-@keyframes blink {
-  0%, 49% {
-    opacity: 1;
-  }
-  50%, 100% {
-    opacity: 0;
-  }
-}
-
-.cursor-blink::after {
-  content: '▊';
-  animation: blink 1s infinite;
-  margin-left: 2px;
-}
-
-/* Data Stream Effect */
-@keyframes dataStream {
-  0% {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-}
-
-.data-stream {
-  position: absolute;
-  color: var(--cyber-cyan);
-  font-size: 12px;
-  animation: dataStream 3s linear infinite;
-}
-
-/* Button Styles */
-.cyber-button {
-  position: relative;
-  background: transparent;
-  border: 2px solid var(--cyber-cyan);
-  color: var(--cyber-cyan);
-  font-family: var(--font-display);
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.cyber-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, var(--cyber-cyan), transparent);
-  transition: left 0.5s ease;
-}
-
-.cyber-button:hover::before {
-  left: 100%;
-}
-
-.cyber-button:hover {
-  box-shadow:
-    0 0 20px var(--cyber-glow),
-    inset 0 0 20px rgba(0, 255, 255, 0.2);
-  text-shadow: 0 0 10px var(--cyber-glow);
-}
-
-/* Corner Brackets Decoration */
-.corner-brackets {
-  position: relative;
-}
-
-.corner-brackets::before,
-.corner-brackets::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--cyber-cyan);
-}
-
-.corner-brackets::before {
-  top: -5px;
-  left: -5px;
-  border-right: none;
-  border-bottom: none;
-}
-
-.corner-brackets::after {
-  bottom: -5px;
-  right: -5px;
-  border-left: none;
-  border-top: none;
 }

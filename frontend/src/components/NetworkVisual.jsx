@@ -1,40 +1,30 @@
 import { useState, useEffect } from 'react'
 
-const CyberParticle = ({ progress, isCacheHit }) => {
-  const color = isCacheHit ? '#00ff41' : '#00ffff'
+const AnimatedParticle = ({ progress, isCacheHit }) => {
+  const color = isCacheHit ? '#10b981' : '#ef4444'
 
   return (
     <div
-      className="absolute w-2 h-2 transition-all duration-100"
+      className="absolute w-3 h-3 rounded-full"
       style={{
         left: `${progress}%`,
-        top: '50%',
-        transform: 'translate(-50%, -50%)',
+        top: '0',
         background: color,
-        boxShadow: `
-          0 0 5px ${color},
-          0 0 10px ${color},
-          0 0 20px ${color}
-        `,
-        opacity: 1 - (progress / 100) * 0.4,
+        boxShadow: `0 0 10px ${color}`,
+        opacity: 1 - (progress / 100) * 0.5
       }}
-    >
-      <div
-        className="absolute inset-0 rounded-full animate-ping"
-        style={{ background: color }}
-      />
-    </div>
+    />
   )
 }
 
-const ConnectionLine = ({ x1, y1, x2, y2, isActive, isCacheHit }) => {
+const ConnectionLine = ({ from, to, isActive, isCacheHit }) => {
   const [particles, setParticles] = useState([])
 
   useEffect(() => {
     if (isActive) {
       const newParticle = {
         id: Date.now() + Math.random(),
-        progress: 0,
+        progress: 0
       }
       setParticles(prev => [...prev, newParticle])
     }
@@ -44,7 +34,7 @@ const ConnectionLine = ({ x1, y1, x2, y2, isActive, isCacheHit }) => {
     const interval = setInterval(() => {
       setParticles(prev =>
         prev
-          .map(p => ({ ...p, progress: p.progress + 4 }))
+          .map(p => ({ ...p, progress: p.progress + 3 }))
           .filter(p => p.progress < 100)
       )
     }, 30)
@@ -52,40 +42,32 @@ const ConnectionLine = ({ x1, y1, x2, y2, isActive, isCacheHit }) => {
     return () => clearInterval(interval)
   }, [])
 
-  const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI)
-  const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+  // Calculate line angle and length
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+  const length = Math.sqrt(dx * dx + dy * dy)
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI)
 
   return (
     <div
-      className="absolute origin-left pointer-events-none"
+      className="absolute origin-left"
       style={{
-        left: `${x1}%`,
-        top: `${y1}%`,
-        width: `${length}%`,
-        transform: `rotate(${angle}deg)`,
+        left: `${from.x}px`,
+        top: `${from.y}px`,
+        width: `${length}px`,
         height: '2px',
+        transform: `rotate(${angle}deg)`,
+        transformOrigin: '0 0'
       }}
     >
-      {/* Glowing cyber line */}
-      <div className={`absolute inset-0 transition-all duration-500 ${
+      <div className={`absolute inset-0 bg-redhat-red transition-opacity duration-500 ${
         isActive ? 'opacity-100' : 'opacity-30'
-      }`}>
-        <div
-          className="absolute inset-0"
-          style={{
-            background: isActive
-              ? 'linear-gradient(90deg, #00ffff, #ff00ff, #00ffff)'
-              : '#00ffff',
-            boxShadow: isActive
-              ? '0 0 10px #00ffff, 0 0 20px #00ffff'
-              : '0 0 5px #00ffff',
-          }}
-        />
-      </div>
+      }`} style={{
+        boxShadow: isActive ? '0 0 10px #EE0000' : 'none'
+      }} />
 
-      {/* Particles */}
       {particles.map(particle => (
-        <CyberParticle
+        <AnimatedParticle
           key={particle.id}
           progress={particle.progress}
           isCacheHit={isCacheHit}
@@ -95,116 +77,61 @@ const ConnectionLine = ({ x1, y1, x2, y2, isActive, isCacheHit }) => {
   )
 }
 
-const ReplicaNode = ({ replica, position, isActive, isCacheHit }) => {
+const ReplicaNode = ({ replica, x, y, isActive, isCacheHit }) => {
   const getStatusColor = () => {
-    if (replica.status !== 'active') return '#4a5568'
-    if (replica.load < 40) return '#00ff41'
-    if (replica.load < 70) return '#ffff00'
-    return '#ff00ff'
+    if (replica.status !== 'active') return 'bg-gray-700 border-gray-600'
+    if (replica.load < 40) return 'bg-green-500/20 border-green-500'
+    if (replica.load < 70) return 'bg-yellow-500/20 border-yellow-500'
+    return 'bg-red-500/20 border-red-500'
   }
 
-  const statusColor = getStatusColor()
+  const getLoadColor = () => {
+    if (replica.load < 40) return 'bg-green-500'
+    if (replica.load < 70) return 'bg-yellow-500'
+    return 'bg-red-500'
+  }
 
   return (
     <div
-      className="absolute transition-all duration-500 font-mono"
+      className="absolute"
       style={{
-        left: position.x,
-        top: position.y,
-        transform: 'translate(-50%, -50%)',
+        left: `${x}px`,
+        top: `${y}px`,
+        transform: 'translate(-50%, -50%)'
       }}
     >
-      {/* Pulse ring on activity */}
       {isActive && (
-        <div className="absolute inset-0 w-32 h-32 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
-          <div
-            className="absolute inset-0 rounded border-2 animate-ping"
-            style={{
-              borderColor: statusColor,
-              boxShadow: `0 0 20px ${statusColor}`,
-            }}
-          />
+        <div className="absolute inset-0 w-32 h-32 -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute inset-0 rounded-full bg-redhat-red/30 animate-ping" />
         </div>
       )}
 
-      {/* Node container */}
       <div
         className={`
-          relative w-28 h-28
+          w-28 h-28 rounded-full border-4
           flex flex-col items-center justify-center
-          transition-all duration-500
-          terminal-border
+          transition-all duration-300
+          ${getStatusColor()}
           ${isActive ? 'scale-110' : 'scale-100'}
         `}
-        style={{
-          background: 'rgba(10, 14, 39, 0.9)',
-          borderColor: statusColor,
-          boxShadow: `
-            0 0 20px ${statusColor},
-            inset 0 0 20px rgba(0, 255, 255, 0.1)
-          `,
-        }}
       >
-        {/* Corner brackets */}
-        <div className="absolute -top-2 -left-2 w-4 h-4 border-l-2 border-t-2" style={{ borderColor: statusColor }} />
-        <div className="absolute -top-2 -right-2 w-4 h-4 border-r-2 border-t-2" style={{ borderColor: statusColor }} />
-        <div className="absolute -bottom-2 -left-2 w-4 h-4 border-l-2 border-b-2" style={{ borderColor: statusColor }} />
-        <div className="absolute -bottom-2 -right-2 w-4 h-4 border-r-2 border-b-2" style={{ borderColor: statusColor }} />
-
-        {/* Node content */}
-        <div className="text-center z-10">
-          <div
-            className="text-2xl mb-1 font-display font-bold neon-text"
-            style={{
-              color: statusColor,
-              textShadow: `0 0 10px ${statusColor}`,
-            }}
-          >
-            {replica.status === 'active' ? 'ONLINE' : 'OFFLINE'}
-          </div>
-          <div className="text-xs text-cyber-cyan font-tech tracking-wider">
-            {replica.replicaName}
-          </div>
-          {isCacheHit && (
-            <div className="text-cyber-green text-lg mt-1 neon-text-green animate-pulseNeon">
-              ✓ CACHED
-            </div>
-          )}
-        </div>
-
-        {/* Queue badge */}
-        {replica.currentVehicles > 0 && (
-          <div
-            className="absolute -top-3 -right-3 w-7 h-7 flex items-center justify-center text-xs font-bold font-display terminal-border"
-            style={{
-              background: '#0a0e27',
-              borderColor: '#ff00ff',
-              color: '#ff00ff',
-              boxShadow: '0 0 10px #ff00ff',
-            }}
-          >
-            {replica.currentVehicles}
-          </div>
-        )}
+        <div className="text-2xl mb-1">{replica.status === 'active' ? '⚡' : '⚫'}</div>
+        <div className="text-xs font-bold text-white">{replica.replicaName}</div>
+        <div className="text-xs text-gray-400 mt-1">Q: {replica.currentVehicles}</div>
+        {isCacheHit && <div className="text-lg mt-1">💚</div>}
       </div>
 
-      {/* Load indicator */}
-      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-28">
-        <div className="flex items-center justify-between text-xs text-cyber-cyan mb-1 font-tech">
-          <span>LOAD</span>
-          <span>{replica.load.toFixed(0)}%</span>
+      {replica.currentVehicles > 0 && (
+        <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-redhat-red border-2 border-white flex items-center justify-center text-xs font-bold">
+          {replica.currentVehicles}
         </div>
-        <div
-          className="h-2 bg-cyber-bg border border-cyber-cyan"
-          style={{ boxShadow: 'inset 0 0 10px rgba(0, 255, 255, 0.2)' }}
-        >
+      )}
+
+      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28">
+        <div className="h-2 bg-gray-900 rounded-full overflow-hidden border border-gray-700">
           <div
-            className="h-full transition-all duration-300"
-            style={{
-              width: `${replica.load}%`,
-              background: statusColor,
-              boxShadow: `0 0 10px ${statusColor}`,
-            }}
+            className={`h-full transition-all duration-300 ${getLoadColor()}`}
+            style={{ width: `${replica.load}%` }}
           />
         </div>
       </div>
@@ -215,6 +142,7 @@ const ReplicaNode = ({ replica, position, isActive, isCacheHit }) => {
 const NetworkVisual = ({ lanes, lastActivity }) => {
   const [activeConnections, setActiveConnections] = useState({})
   const [cacheHits, setCacheHits] = useState({})
+  const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
 
   useEffect(() => {
     if (lastActivity?.replicaId) {
@@ -239,21 +167,24 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
     }
   }, [lastActivity])
 
+  // Fixed pixel positions
+  const routerPos = { x: dimensions.width / 2, y: dimensions.height * 0.25 }
   const replicaPositions = {
-    'replica-1': { x: 20, y: 75 },
-    'replica-2': { x: 50, y: 85 },
-    'replica-3': { x: 80, y: 75 },
+    'replica-1': { x: dimensions.width * 0.25, y: dimensions.height * 0.75 },
+    'replica-2': { x: dimensions.width * 0.5, y: dimensions.height * 0.85 },
+    'replica-3': { x: dimensions.width * 0.75, y: dimensions.height * 0.75 }
   }
 
-  const routerPos = { x: 50, y: 20 }
-
   return (
-    <div className="relative w-full h-full bg-cyber-bg rounded-lg overflow-hidden terminal-border grid-bg">
-      {/* Hexagon overlay */}
-      <div className="absolute inset-0 hex-bg opacity-50" />
+    <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border border-white/10 min-h-[500px]">
+      {/* Grid background */}
+      <div className="absolute inset-0 opacity-20" style={{
+        backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+        backgroundSize: '30px 30px'
+      }} />
 
-      {/* Connection lines */}
-      <div className="absolute inset-0">
+      {/* SVG for connection lines */}
+      <svg className="absolute inset-0 w-full h-full">
         {Object.entries(replicaPositions).map(([replicaId, pos]) => {
           const lane = lanes.find(l => l.id === replicaId)
           if (!lane || lane.status !== 'active') return null
@@ -261,44 +192,28 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
           return (
             <ConnectionLine
               key={replicaId}
-              x1={routerPos.x}
-              y1={routerPos.y}
-              x2={pos.x}
-              y2={pos.y}
+              from={routerPos}
+              to={pos}
               isActive={activeConnections[replicaId]}
               isCacheHit={cacheHits[replicaId]}
             />
           )
         })}
-      </div>
+      </svg>
 
       {/* Router node */}
       <div
         className="absolute z-10"
         style={{
-          left: `${routerPos.x}%`,
-          top: `${routerPos.y}%`,
-          transform: 'translate(-50%, -50%)',
+          left: `${routerPos.x}px`,
+          top: `${routerPos.y}px`,
+          transform: 'translate(-50%, -50%)'
         }}
       >
-        {/* Outer pulse */}
-        <div className="absolute inset-0 w-36 h-36 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
-          <div className="absolute inset-0 border-2 border-cyber-cyan rounded animate-pulseNeon" />
-        </div>
-
-        {/* Router */}
-        <div className="relative w-36 h-36 flex flex-col items-center justify-center terminal-border bg-cyber-bg-light">
-          {/* Corner brackets */}
-          <div className="absolute -top-3 -left-3 w-6 h-6 border-l-2 border-t-2 border-cyber-magenta" />
-          <div className="absolute -top-3 -right-3 w-6 h-6 border-r-2 border-t-2 border-cyber-magenta" />
-          <div className="absolute -bottom-3 -left-3 w-6 h-6 border-l-2 border-b-2 border-cyber-magenta" />
-          <div className="absolute -bottom-3 -right-3 w-6 h-6 border-r-2 border-b-2 border-cyber-magenta" />
-
-          <div className="text-4xl mb-2 neon-text-magenta">⬡</div>
-          <div className="text-xs font-display font-bold neon-text-magenta tracking-wider">
-            ROUTER
-          </div>
-          <div className="text-xs text-cyber-cyan font-tech mt-1">LLM-D</div>
+        <div className="w-36 h-36 rounded-full bg-gradient-to-br from-redhat-red to-pink-600 shadow-2xl border-4 border-white/30 flex flex-col items-center justify-center">
+          <div className="text-4xl mb-2">🧠</div>
+          <div className="text-sm font-bold text-white">Smart Router</div>
+          <div className="text-xs text-white/80">LLM-D</div>
         </div>
       </div>
 
@@ -307,7 +222,8 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
         <ReplicaNode
           key={lane.id}
           replica={lane}
-          position={replicaPositions[lane.id]}
+          x={replicaPositions[lane.id].x}
+          y={replicaPositions[lane.id].y}
           isActive={activeConnections[lane.id]}
           isCacheHit={cacheHits[lane.id]}
         />
@@ -315,24 +231,18 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
 
       {/* Activity overlay */}
       {lastActivity && (
-        <div className="absolute top-4 right-4 cyber-glass rounded px-4 py-3 max-w-xs animate-fadeIn font-tech text-xs">
+        <div className="absolute top-4 right-4 glass rounded-xl px-4 py-3 max-w-xs animate-fadeIn">
           <div className="flex items-start gap-3">
-            <div className="text-xl">
-              {lastActivity.cached ? (
-                <span className="neon-text-green">✓</span>
-              ) : (
-                <span className="neon-text">→</span>
-              )}
-            </div>
+            <div className="text-2xl">{lastActivity.cached ? '💚' : '🔀'}</div>
             <div>
-              <div className="font-bold text-cyber-cyan mb-1">
-                {lastActivity.cached ? 'CACHE_HIT' : 'ROUTE'}
+              <div className="font-bold text-white mb-1">
+                {lastActivity.cached ? 'Cache Hit!' : 'New Route'}
               </div>
-              <div className="text-cyber-cyan opacity-80">
-                TARGET: {lastActivity.replicaName}
+              <div className="text-xs text-gray-300">
+                → {lastActivity.replicaName}
               </div>
               {lastActivity.ttft && (
-                <div className={lastActivity.cached ? 'text-cyber-green' : 'text-cyber-cyan'}>
+                <div className="text-xs text-gray-400 mt-1">
                   TTFT: {lastActivity.ttft.toFixed(3)}s
                 </div>
               )}
@@ -342,15 +252,15 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
       )}
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 cyber-glass rounded px-4 py-2 text-xs font-tech">
+      <div className="absolute bottom-4 left-4 glass rounded-lg px-4 py-2 text-xs">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-cyber-green" style={{ boxShadow: '0 0 10px #00ff41' }} />
-            <span className="text-cyber-cyan">CACHED</span>
+            <div className="w-3 h-3 bg-green-500 rounded-full" />
+            <span>Cache Hit</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-cyber-cyan" style={{ boxShadow: '0 0 10px #00ffff' }} />
-            <span className="text-cyber-cyan">NEW</span>
+            <div className="w-3 h-3 bg-red-500 rounded-full" />
+            <span>New Request</span>
           </div>
         </div>
       </div>

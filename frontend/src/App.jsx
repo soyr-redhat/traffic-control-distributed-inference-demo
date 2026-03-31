@@ -14,9 +14,9 @@ function App() {
     totalTokens: 0
   })
   const [lanes, setLanes] = useState([
-    { id: 'replica-1', replicaName: 'NODE_01', status: 'active', load: 0, requestsPerSec: 0, currentVehicles: 0 },
-    { id: 'replica-2', replicaName: 'NODE_02', status: 'active', load: 0, requestsPerSec: 0, currentVehicles: 0 },
-    { id: 'replica-3', replicaName: 'NODE_03', status: 'closed', load: 0, requestsPerSec: 0, currentVehicles: 0 }
+    { id: 'replica-1', replicaName: 'Replica 1', status: 'active', load: 0, requestsPerSec: 0, currentVehicles: 0 },
+    { id: 'replica-2', replicaName: 'Replica 2', status: 'active', load: 0, requestsPerSec: 0, currentVehicles: 0 },
+    { id: 'replica-3', replicaName: 'Replica 3', status: 'closed', load: 0, requestsPerSec: 0, currentVehicles: 0 }
   ])
   const [lastActivity, setLastActivity] = useState(null)
   const [infoModalOpen, setInfoModalOpen] = useState(false)
@@ -43,11 +43,11 @@ function App() {
         const newActivity = {
           id: Date.now(),
           message: data.activity.cached
-            ? `[CACHE_HIT] → ${data.activity.replicaName} [${data.activity.ttft?.toFixed(3)}s]`
-            : `[ROUTE] → ${data.activity.replicaName}`,
+            ? `✅ Cache hit → ${data.activity.replicaName} (${data.activity.ttft?.toFixed(3)}s)`
+            : `🔀 Routed → ${data.activity.replicaName}`,
           timestamp: new Date().toLocaleTimeString()
         }
-        setRecentActivities(prev => [newActivity, ...prev].slice(0, 8))
+        setRecentActivities(prev => [newActivity, ...prev].slice(0, 5))
       }
     }
 
@@ -133,20 +133,24 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-cyber-bg flex flex-col font-mono text-cyber-cyan">
-      {/* Terminal Header */}
-      <header className="border-b-2 border-cyber-cyan bg-cyber-bg-light relative overflow-hidden">
-        <div className="absolute inset-0 grid-bg opacity-30" />
-        <div className="relative container mx-auto px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex flex-col relative">
+      {/* Grid Background */}
+      <div className="grid-background" />
+
+      {/* Header */}
+      <header className="relative bg-black/50 backdrop-blur-lg border-b border-redhat-red/30 z-10">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="text-3xl neon-text-magenta">⬡</div>
+              <div className="w-12 h-12 rounded-lg bg-redhat-red flex items-center justify-center">
+                <span className="text-2xl">🚦</span>
+              </div>
               <div>
-                <h1 className="text-xl font-display font-bold neon-text tracking-wider">
-                  LLM_TRAFFIC_CONTROL
+                <h1 className="text-2xl font-display font-bold text-white">
+                  LLM Traffic Control
                 </h1>
-                <p className="text-xs text-cyber-cyan opacity-70 font-tech mt-0.5">
-                  DISTRIBUTED_INFERENCE_MONITOR_v2.1
+                <p className="text-gray-400 text-sm">
+                  Real-time distributed inference monitoring
                 </p>
               </div>
             </div>
@@ -155,33 +159,31 @@ function App() {
                 setInfoTopic('llmd')
                 setInfoModalOpen(true)
               }}
-              className="cyber-button text-xs"
+              className="glass hover:bg-white/10 transition-all rounded-lg px-4 py-2 text-sm"
             >
-              [INFO]
+              <span className="mr-2">ℹ️</span> About LLM-D
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Grid */}
-      <div className="flex-1 container mx-auto px-6 py-6 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-full">
-          {/* Left Panel */}
-          <div className="lg:col-span-1 space-y-4 stagger-1">
+      {/* Main Content */}
+      <div className="flex-1 container mx-auto px-6 py-6 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
+          {/* Left Column - Controls & Metrics */}
+          <div className="lg:col-span-1 space-y-6">
             {/* Prompt Input */}
-            <div className="cyber-glass rounded p-4">
-              <div className="flex items-center justify-between mb-3 border-b border-cyber-cyan pb-2">
-                <h3 className="text-xs font-display font-bold tracking-wider">
-                  [INPUT]
-                </h3>
+            <div className="glass rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-white">Send Prompt</h3>
                 <button
                   onClick={() => {
                     setInfoTopic('router')
                     setInfoModalOpen(true)
                   }}
-                  className="text-cyber-cyan hover:text-cyber-magenta transition-colors text-xs"
+                  className="text-gray-400 hover:text-white text-xs"
                 >
-                  ?
+                  ℹ️
                 </button>
               </div>
               <PromptInput
@@ -193,72 +195,70 @@ function App() {
             </div>
 
             {/* Metrics */}
-            <div className="cyber-glass rounded p-4">
-              <div className="flex items-center justify-between mb-3 border-b border-cyber-cyan pb-2">
-                <h3 className="text-xs font-display font-bold tracking-wider">
-                  [METRICS]
-                </h3>
+            <div className="glass rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-white">Metrics</h3>
                 <button
                   onClick={() => {
                     setInfoTopic('metrics')
                     setInfoModalOpen(true)
                   }}
-                  className="text-cyber-cyan hover:text-cyber-magenta transition-colors text-xs"
+                  className="text-gray-400 hover:text-white text-xs"
                 >
-                  ?
+                  ℹ️
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-2 font-tech text-xs">
-                <div className="border border-cyber-cyan p-2 bg-cyber-bg">
-                  <div className="text-cyber-cyan opacity-60">THROUGHPUT</div>
-                  <div className="text-lg neon-text mt-1">{metrics.throughput.toFixed(1)}</div>
-                  <div className="text-cyber-cyan opacity-60">tok/s</div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="glass rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-redhat-red">
+                    {metrics.throughput.toFixed(1)}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">tok/s</div>
                 </div>
-                <div className="border border-cyber-green p-2 bg-cyber-bg">
-                  <div className="text-cyber-cyan opacity-60">CACHE</div>
-                  <div className="text-lg neon-text-green mt-1">{metrics.cacheHitRate.toFixed(0)}%</div>
-                  <div className="text-cyber-cyan opacity-60">hit_rate</div>
+                <div className="glass rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-green-400">
+                    {metrics.cacheHitRate.toFixed(0)}%
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">Cache</div>
                 </div>
-                <div className="border border-cyber-cyan p-2 bg-cyber-bg">
-                  <div className="text-cyber-cyan opacity-60">LATENCY</div>
-                  <div className="text-lg neon-text mt-1">{metrics.avgLatency.toFixed(2)}s</div>
-                  <div className="text-cyber-cyan opacity-60">avg</div>
+                <div className="glass rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-blue-400">
+                    {metrics.avgLatency.toFixed(2)}s
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">Latency</div>
                 </div>
-                <div className="border border-cyber-magenta p-2 bg-cyber-bg">
-                  <div className="text-cyber-cyan opacity-60">NODES</div>
-                  <div className="text-lg neon-text-magenta mt-1">{metrics.activeLanes}/{metrics.totalLanes}</div>
-                  <div className="text-cyber-cyan opacity-60">active</div>
+                <div className="glass rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-purple-400">
+                    {metrics.activeLanes}/{metrics.totalLanes}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">Active</div>
                 </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-cyber-cyan text-xs font-tech space-y-1">
+              <div className="mt-4 pt-4 border-t border-gray-700 text-xs space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-cyber-cyan opacity-60">REQUESTS:</span>
-                  <span className="neon-text">{metrics.totalRequests}</span>
+                  <span className="text-gray-400">Requests:</span>
+                  <span className="text-white font-semibold">{metrics.totalRequests}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-cyber-cyan opacity-60">TOKENS:</span>
-                  <span className="neon-text">{metrics.totalTokens.toLocaleString()}</span>
+                  <span className="text-gray-400">Tokens:</span>
+                  <span className="text-white font-semibold">{metrics.totalTokens.toLocaleString()}</span>
                 </div>
               </div>
             </div>
 
             {/* Activity Log */}
-            <div className="cyber-glass rounded p-4 flex-1">
-              <div className="flex items-center justify-between mb-3 border-b border-cyber-cyan pb-2">
-                <h3 className="text-xs font-display font-bold tracking-wider">
-                  [ACTIVITY_LOG]
-                </h3>
-              </div>
-              <div className="space-y-1 text-xs font-tech max-h-64 overflow-y-auto">
+            <div className="glass rounded-2xl p-5 flex-1">
+              <h3 className="text-sm font-bold text-white mb-4">Recent Activity</h3>
+              <div className="space-y-2">
                 {recentActivities.length === 0 ? (
-                  <div className="text-cyber-cyan opacity-40 py-4 text-center">
-                    &gt; WAITING_FOR_DATA...
+                  <div className="text-xs text-gray-500 text-center py-8">
+                    Waiting for activity...
                   </div>
                 ) : (
                   recentActivities.map(activity => (
-                    <div key={activity.id} className="border-l-2 border-cyber-cyan pl-2 py-1 animate-fadeIn bg-cyber-bg-light">
-                      <div className="text-cyber-cyan">{activity.message}</div>
-                      <div className="text-cyber-cyan opacity-40 text-xs">{activity.timestamp}</div>
+                    <div key={activity.id} className="glass rounded-lg px-3 py-2 text-xs animate-fadeIn">
+                      <div className="text-gray-200">{activity.message}</div>
+                      <div className="text-gray-500 mt-1">{activity.timestamp}</div>
                     </div>
                   ))
                 )}
@@ -266,24 +266,22 @@ function App() {
             </div>
           </div>
 
-          {/* Right Panel - Network */}
-          <div className="lg:col-span-3 stagger-2">
+          {/* Right Column - Network Visualization */}
+          <div className="lg:col-span-3">
             <div className="h-full flex flex-col">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-display font-bold tracking-wider neon-text">
-                  [NETWORK_TOPOLOGY]
-                </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white">Request Flow Network</h3>
                 <button
                   onClick={() => {
                     setInfoTopic('caching')
                     setInfoModalOpen(true)
                   }}
-                  className="cyber-button text-xs"
+                  className="glass rounded-lg px-3 py-2 text-sm hover:bg-white/10 transition-all"
                 >
-                  [HELP]
+                  ℹ️ Learn More
                 </button>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-h-[500px]">
                 <NetworkVisual lanes={lanes} lastActivity={lastActivity} />
               </div>
             </div>
@@ -292,30 +290,20 @@ function App() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t-2 border-cyber-cyan bg-cyber-bg-light py-3 font-tech text-xs">
-        <div className="container mx-auto px-6 flex items-center justify-between">
-          <div className="text-cyber-cyan opacity-70">
-            POWERED_BY: <span className="neon-text">LLM-D</span> + vLLM | STATUS: <span className="neon-text-green">ONLINE</span>
-          </div>
-          <div className="flex gap-4">
-            <button
-              onClick={() => {
-                setInfoTopic('router')
-                setInfoModalOpen(true)
-              }}
-              className="text-cyber-cyan hover:text-cyber-magenta transition-colors"
-            >
-              [HOW_IT_WORKS]
-            </button>
-            <button
-              onClick={() => {
-                setInfoTopic('caching')
-                setInfoModalOpen(true)
-              }}
-              className="text-cyber-cyan hover:text-cyber-magenta transition-colors"
-            >
-              [CACHING]
-            </button>
+      <footer className="relative py-4 border-t border-gray-800 bg-black/50 backdrop-blur-lg z-10">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between text-xs">
+            <div className="text-gray-500">
+              Powered by <span className="text-redhat-red font-semibold">LLM-D</span> + vLLM
+            </div>
+            <div className="flex gap-4 text-gray-400">
+              <button onClick={() => { setInfoTopic('router'); setInfoModalOpen(true); }} className="hover:text-white">
+                How It Works
+              </button>
+              <button onClick={() => { setInfoTopic('caching'); setInfoModalOpen(true); }} className="hover:text-white">
+                Prefix Caching
+              </button>
+            </div>
           </div>
         </div>
       </footer>
