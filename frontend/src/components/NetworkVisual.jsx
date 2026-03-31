@@ -1,39 +1,50 @@
 import { useState, useEffect } from 'react'
 
-const AnimatedParticle = ({ progress, color }) => (
-  <div
-    className="absolute w-4 h-4 rounded-full transition-all duration-100 animate-pulse"
-    style={{
-      left: `${progress}%`,
-      top: '50%',
-      transform: 'translate(-50%, -50%)',
-      background: `radial-gradient(circle, ${color}, ${color}88)`,
-      boxShadow: `0 0 20px ${color}, 0 0 40px ${color}66`,
-      opacity: 1 - (progress / 100) * 0.3
-    }}
-  />
-)
+const CyberParticle = ({ progress, isCacheHit }) => {
+  const color = isCacheHit ? '#00ff41' : '#00ffff'
+
+  return (
+    <div
+      className="absolute w-2 h-2 transition-all duration-100"
+      style={{
+        left: `${progress}%`,
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        background: color,
+        boxShadow: `
+          0 0 5px ${color},
+          0 0 10px ${color},
+          0 0 20px ${color}
+        `,
+        opacity: 1 - (progress / 100) * 0.4,
+      }}
+    >
+      <div
+        className="absolute inset-0 rounded-full animate-ping"
+        style={{ background: color }}
+      />
+    </div>
+  )
+}
 
 const ConnectionLine = ({ x1, y1, x2, y2, isActive, isCacheHit }) => {
   const [particles, setParticles] = useState([])
 
   useEffect(() => {
     if (isActive) {
-      const color = isCacheHit ? '#10b981' : '#ef4444'
       const newParticle = {
         id: Date.now() + Math.random(),
         progress: 0,
-        color
       }
       setParticles(prev => [...prev, newParticle])
     }
-  }, [isActive, isCacheHit])
+  }, [isActive])
 
   useEffect(() => {
     const interval = setInterval(() => {
       setParticles(prev =>
         prev
-          .map(p => ({ ...p, progress: p.progress + 3 }))
+          .map(p => ({ ...p, progress: p.progress + 4 }))
           .filter(p => p.progress < 100)
       )
     }, 30)
@@ -52,23 +63,32 @@ const ConnectionLine = ({ x1, y1, x2, y2, isActive, isCacheHit }) => {
         top: `${y1}%`,
         width: `${length}%`,
         transform: `rotate(${angle}deg)`,
-        height: '4px'
+        height: '2px',
       }}
     >
-      {/* Glowing line */}
+      {/* Glowing cyber line */}
       <div className={`absolute inset-0 transition-all duration-500 ${
-        isActive ? 'opacity-70' : 'opacity-20'
+        isActive ? 'opacity-100' : 'opacity-30'
       }`}>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-redhat-red/50 to-transparent" />
-        <div className="absolute inset-0 bg-redhat-red/20 blur-sm" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: isActive
+              ? 'linear-gradient(90deg, #00ffff, #ff00ff, #00ffff)'
+              : '#00ffff',
+            boxShadow: isActive
+              ? '0 0 10px #00ffff, 0 0 20px #00ffff'
+              : '0 0 5px #00ffff',
+          }}
+        />
       </div>
 
-      {/* Animated particles */}
+      {/* Particles */}
       {particles.map(particle => (
-        <AnimatedParticle
+        <CyberParticle
           key={particle.id}
           progress={particle.progress}
-          color={particle.color}
+          isCacheHit={isCacheHit}
         />
       ))}
     </div>
@@ -76,84 +96,116 @@ const ConnectionLine = ({ x1, y1, x2, y2, isActive, isCacheHit }) => {
 }
 
 const ReplicaNode = ({ replica, position, isActive, isCacheHit }) => {
-  const getGradient = () => {
-    if (replica.status !== 'active') return 'from-gray-700 to-gray-800'
-    if (replica.load < 40) return 'from-emerald-500 to-green-600'
-    if (replica.load < 70) return 'from-yellow-500 to-orange-500'
-    return 'from-red-500 to-pink-600'
+  const getStatusColor = () => {
+    if (replica.status !== 'active') return '#4a5568'
+    if (replica.load < 40) return '#00ff41'
+    if (replica.load < 70) return '#ffff00'
+    return '#ff00ff'
   }
 
-  const getGlow = () => {
-    if (replica.status !== 'active') return 'shadow-lg shadow-gray-900/50'
-    if (replica.load < 40) return 'shadow-xl shadow-green-500/50'
-    if (replica.load < 70) return 'shadow-xl shadow-yellow-500/50'
-    return 'shadow-xl shadow-red-500/50'
-  }
+  const statusColor = getStatusColor()
 
   return (
     <div
-      className="absolute transition-all duration-500"
+      className="absolute transition-all duration-500 font-mono"
       style={{
         left: position.x,
         top: position.y,
-        transform: 'translate(-50%, -50%)'
+        transform: 'translate(-50%, -50%)',
       }}
     >
-      {/* Outer glow ring */}
+      {/* Pulse ring on activity */}
       {isActive && (
-        <div className="absolute inset-0 w-40 h-40 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
-          <div className="absolute inset-0 rounded-full bg-redhat-red/30 animate-ping" />
+        <div className="absolute inset-0 w-32 h-32 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
+          <div
+            className="absolute inset-0 rounded border-2 animate-ping"
+            style={{
+              borderColor: statusColor,
+              boxShadow: `0 0 20px ${statusColor}`,
+            }}
+          />
         </div>
       )}
 
-      {/* Cache hit glow */}
-      {isCacheHit && (
-        <div className="absolute inset-0 w-40 h-40 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
-          <div className="absolute inset-0 rounded-full bg-green-400/40 animate-pulse" />
-        </div>
-      )}
-
-      {/* Node */}
+      {/* Node container */}
       <div
         className={`
-          relative w-36 h-36 rounded-full
-          bg-gradient-to-br ${getGradient()}
-          border-4 border-white/20
+          relative w-28 h-28
           flex flex-col items-center justify-center
           transition-all duration-500
-          ${getGlow()}
+          terminal-border
           ${isActive ? 'scale-110' : 'scale-100'}
         `}
+        style={{
+          background: 'rgba(10, 14, 39, 0.9)',
+          borderColor: statusColor,
+          boxShadow: `
+            0 0 20px ${statusColor},
+            inset 0 0 20px rgba(0, 255, 255, 0.1)
+          `,
+        }}
       >
-        {/* Inner content */}
-        <div className="absolute inset-4 rounded-full bg-black/20 backdrop-blur-sm flex flex-col items-center justify-center">
-          <div className="text-4xl mb-1">{replica.status === 'active' ? '⚡' : '⚫'}</div>
-          <div className="text-xs font-bold text-white tracking-wide">{replica.replicaName}</div>
-          {isCacheHit && <div className="text-2xl mt-1 animate-bounce">💚</div>}
+        {/* Corner brackets */}
+        <div className="absolute -top-2 -left-2 w-4 h-4 border-l-2 border-t-2" style={{ borderColor: statusColor }} />
+        <div className="absolute -top-2 -right-2 w-4 h-4 border-r-2 border-t-2" style={{ borderColor: statusColor }} />
+        <div className="absolute -bottom-2 -left-2 w-4 h-4 border-l-2 border-b-2" style={{ borderColor: statusColor }} />
+        <div className="absolute -bottom-2 -right-2 w-4 h-4 border-r-2 border-b-2" style={{ borderColor: statusColor }} />
+
+        {/* Node content */}
+        <div className="text-center z-10">
+          <div
+            className="text-2xl mb-1 font-display font-bold neon-text"
+            style={{
+              color: statusColor,
+              textShadow: `0 0 10px ${statusColor}`,
+            }}
+          >
+            {replica.status === 'active' ? 'ONLINE' : 'OFFLINE'}
+          </div>
+          <div className="text-xs text-cyber-cyan font-tech tracking-wider">
+            {replica.replicaName}
+          </div>
+          {isCacheHit && (
+            <div className="text-cyber-green text-lg mt-1 neon-text-green animate-pulseNeon">
+              ✓ CACHED
+            </div>
+          )}
         </div>
 
-        {/* Queue indicator */}
+        {/* Queue badge */}
         {replica.currentVehicles > 0 && (
-          <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-redhat-red border-2 border-white flex items-center justify-center text-xs font-bold shadow-lg">
+          <div
+            className="absolute -top-3 -right-3 w-7 h-7 flex items-center justify-center text-xs font-bold font-display terminal-border"
+            style={{
+              background: '#0a0e27',
+              borderColor: '#ff00ff',
+              color: '#ff00ff',
+              boxShadow: '0 0 10px #ff00ff',
+            }}
+          >
             {replica.currentVehicles}
           </div>
         )}
       </div>
 
-      {/* Load bar */}
-      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-32">
-        <div className="h-2 bg-gray-900/50 rounded-full overflow-hidden border border-white/10">
-          <div
-            className={`h-full transition-all duration-300 ${
-              replica.load < 40 ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
-              replica.load < 70 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
-              'bg-gradient-to-r from-red-500 to-pink-500'
-            }`}
-            style={{ width: `${replica.load}%` }}
-          />
+      {/* Load indicator */}
+      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-28">
+        <div className="flex items-center justify-between text-xs text-cyber-cyan mb-1 font-tech">
+          <span>LOAD</span>
+          <span>{replica.load.toFixed(0)}%</span>
         </div>
-        <div className="text-center text-xs text-white/60 mt-1 font-semibold">
-          {replica.load.toFixed(0)}% load
+        <div
+          className="h-2 bg-cyber-bg border border-cyber-cyan"
+          style={{ boxShadow: 'inset 0 0 10px rgba(0, 255, 255, 0.2)' }}
+        >
+          <div
+            className="h-full transition-all duration-300"
+            style={{
+              width: `${replica.load}%`,
+              background: statusColor,
+              boxShadow: `0 0 10px ${statusColor}`,
+            }}
+          />
         </div>
       </div>
     </div>
@@ -190,23 +242,15 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
   const replicaPositions = {
     'replica-1': { x: 20, y: 75 },
     'replica-2': { x: 50, y: 85 },
-    'replica-3': { x: 80, y: 75 }
+    'replica-3': { x: 80, y: 75 },
   }
 
   const routerPos = { x: 50, y: 20 }
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 rounded-2xl overflow-hidden border border-white/10">
-      {/* Animated background */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute inset-0 bg-gradient-to-br from-redhat-red/10 via-transparent to-blue-500/10 animate-pulse" />
-      </div>
-
-      {/* Grid pattern */}
-      <div className="absolute inset-0 opacity-5" style={{
-        backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-        backgroundSize: '30px 30px'
-      }} />
+    <div className="relative w-full h-full bg-cyber-bg rounded-lg overflow-hidden terminal-border grid-bg">
+      {/* Hexagon overlay */}
+      <div className="absolute inset-0 hex-bg opacity-50" />
 
       {/* Connection lines */}
       <div className="absolute inset-0">
@@ -234,22 +278,27 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
         style={{
           left: `${routerPos.x}%`,
           top: `${routerPos.y}%`,
-          transform: 'translate(-50%, -50%)'
+          transform: 'translate(-50%, -50%)',
         }}
       >
-        {/* Outer pulse ring */}
-        <div className="absolute inset-0 w-44 h-44 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
-          <div className="absolute inset-0 rounded-full bg-redhat-red/20 animate-ping" style={{ animationDuration: '3s' }} />
+        {/* Outer pulse */}
+        <div className="absolute inset-0 w-36 h-36 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
+          <div className="absolute inset-0 border-2 border-cyber-cyan rounded animate-pulseNeon" />
         </div>
 
         {/* Router */}
-        <div className="relative w-44 h-44 rounded-full bg-gradient-to-br from-redhat-red via-pink-600 to-purple-600 shadow-2xl shadow-redhat-red/50 border-4 border-white/30">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/10 to-transparent" />
-          <div className="absolute inset-4 rounded-full bg-black/30 backdrop-blur-sm flex flex-col items-center justify-center">
-            <div className="text-5xl mb-2 animate-pulse">🧠</div>
-            <div className="text-sm font-bold text-white tracking-wider">SMART ROUTER</div>
-            <div className="text-xs text-white/80 mt-1">LLM-D</div>
+        <div className="relative w-36 h-36 flex flex-col items-center justify-center terminal-border bg-cyber-bg-light">
+          {/* Corner brackets */}
+          <div className="absolute -top-3 -left-3 w-6 h-6 border-l-2 border-t-2 border-cyber-magenta" />
+          <div className="absolute -top-3 -right-3 w-6 h-6 border-r-2 border-t-2 border-cyber-magenta" />
+          <div className="absolute -bottom-3 -left-3 w-6 h-6 border-l-2 border-b-2 border-cyber-magenta" />
+          <div className="absolute -bottom-3 -right-3 w-6 h-6 border-r-2 border-b-2 border-cyber-magenta" />
+
+          <div className="text-4xl mb-2 neon-text-magenta">⬡</div>
+          <div className="text-xs font-display font-bold neon-text-magenta tracking-wider">
+            ROUTER
           </div>
+          <div className="text-xs text-cyber-cyan font-tech mt-1">LLM-D</div>
         </div>
       </div>
 
@@ -264,23 +313,27 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
         />
       ))}
 
-      {/* Routing info overlay */}
+      {/* Activity overlay */}
       {lastActivity && (
-        <div className="absolute top-6 right-6 glass rounded-xl px-5 py-3 border border-white/10 max-w-xs backdrop-blur-xl animate-fadeIn shadow-2xl">
+        <div className="absolute top-4 right-4 cyber-glass rounded px-4 py-3 max-w-xs animate-fadeIn font-tech text-xs">
           <div className="flex items-start gap-3">
-            <div className="text-2xl">{lastActivity.cached ? '💚' : '🔀'}</div>
+            <div className="text-xl">
+              {lastActivity.cached ? (
+                <span className="neon-text-green">✓</span>
+              ) : (
+                <span className="neon-text">→</span>
+              )}
+            </div>
             <div>
-              <div className="font-bold text-white mb-1">
-                {lastActivity.cached ? 'Cache Hit!' : 'New Route'}
+              <div className="font-bold text-cyber-cyan mb-1">
+                {lastActivity.cached ? 'CACHE_HIT' : 'ROUTE'}
               </div>
-              <div className="text-xs text-gray-300">
-                → {lastActivity.replicaName}
+              <div className="text-cyber-cyan opacity-80">
+                TARGET: {lastActivity.replicaName}
               </div>
               {lastActivity.ttft && (
-                <div className="text-xs text-gray-400 mt-1">
-                  TTFT: <span className={lastActivity.cached ? 'text-green-400 font-semibold' : 'text-white'}>
-                    {lastActivity.ttft.toFixed(3)}s
-                  </span>
+                <div className={lastActivity.cached ? 'text-cyber-green' : 'text-cyber-cyan'}>
+                  TTFT: {lastActivity.ttft.toFixed(3)}s
                 </div>
               )}
             </div>
@@ -289,15 +342,15 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
       )}
 
       {/* Legend */}
-      <div className="absolute bottom-6 left-6 glass rounded-xl px-4 py-3 border border-white/10 backdrop-blur-xl shadow-xl">
-        <div className="flex items-center gap-6 text-xs">
+      <div className="absolute bottom-4 left-4 cyber-glass rounded px-4 py-2 text-xs font-tech">
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500 shadow-lg shadow-green-500/50" />
-            <span className="text-white/90 font-medium">Cache Hit</span>
+            <div className="w-3 h-3 bg-cyber-green" style={{ boxShadow: '0 0 10px #00ff41' }} />
+            <span className="text-cyber-cyan">CACHED</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500 shadow-lg shadow-red-500/50" />
-            <span className="text-white/90 font-medium">New Request</span>
+            <div className="w-3 h-3 bg-cyber-cyan" style={{ boxShadow: '0 0 10px #00ffff' }} />
+            <span className="text-cyber-cyan">NEW</span>
           </div>
         </div>
       </div>

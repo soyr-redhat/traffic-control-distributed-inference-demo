@@ -5,9 +5,9 @@ const PromptInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
   const [isLoading, setIsLoading] = useState(false)
 
   const quickPrompts = [
-    { label: 'Short', text: 'What is AI?', emoji: '⚡' },
-    { label: 'Medium', text: 'Explain neural networks in simple terms.', emoji: '🧠' },
-    { label: 'Long', text: 'Write a detailed guide about artificial intelligence history.', emoji: '📚' }
+    { label: 'SHORT', text: 'What is AI?', code: 'Q1' },
+    { label: 'MEDIUM', text: 'Explain neural networks in simple terms.', code: 'Q2' },
+    { label: 'LONG', text: 'Write a detailed guide about artificial intelligence history.', code: 'Q3' }
   ]
 
   const handleSend = async () => {
@@ -25,75 +25,84 @@ const PromptInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 font-tech text-xs">
       {/* Prompt Input */}
-      <textarea
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Type your prompt here..."
-        className="w-full h-20 bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-redhat-red/50 focus:border-redhat-red resize-none"
-        disabled={isLoading}
-      />
+      <div className="relative">
+        <div className="absolute -top-3 left-2 bg-cyber-bg-light px-2 text-cyber-cyan opacity-60">
+          PROMPT_INPUT
+        </div>
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="> Enter your prompt..."
+          className="w-full h-20 bg-cyber-bg border-2 border-cyber-cyan rounded px-3 py-2 text-cyber-cyan placeholder-cyber-cyan placeholder-opacity-40 focus:outline-none focus:border-cyber-magenta focus:shadow-[0_0_10px_rgba(255,0,255,0.5)] resize-none transition-all"
+          disabled={isLoading}
+        />
+      </div>
 
       {/* Quick Prompts */}
-      <div className="grid grid-cols-3 gap-2">
-        {quickPrompts.map((qp) => (
-          <button
-            key={qp.label}
-            onClick={() => setPrompt(qp.text)}
-            className="glass hover:bg-white/10 transition-all rounded-lg p-2 text-center"
-            title={qp.text}
-          >
-            <div className="text-lg">{qp.emoji}</div>
-            <div className="text-xs font-semibold mt-1">{qp.label}</div>
-          </button>
-        ))}
+      <div>
+        <div className="text-cyber-cyan opacity-60 mb-2">QUICK_SELECT:</div>
+        <div className="grid grid-cols-3 gap-2">
+          {quickPrompts.map((qp) => (
+            <button
+              key={qp.label}
+              onClick={() => setPrompt(qp.text)}
+              className="border border-cyber-cyan bg-cyber-bg hover:bg-cyber-bg-light hover:border-cyber-magenta transition-all p-2 text-center group"
+              title={qp.text}
+            >
+              <div className="text-cyber-cyan group-hover:neon-text-magenta transition-all">
+                [{qp.code}]
+              </div>
+              <div className="text-xs opacity-60 mt-1">{qp.label}</div>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={handleSend}
-          disabled={!prompt.trim() || isLoading}
-          className="bg-redhat-red hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold flex items-center justify-center gap-1"
-        >
-          <span>🚀</span>
-          <span>Send</span>
-        </button>
+      <div>
+        <div className="text-cyber-cyan opacity-60 mb-2">ACTIONS:</div>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={handleSend}
+            disabled={!prompt.trim() || isLoading}
+            className="border-2 border-cyber-cyan bg-cyber-bg text-cyber-cyan hover:bg-cyber-cyan hover:text-cyber-bg disabled:opacity-40 disabled:cursor-not-allowed transition-all p-2 font-bold tracking-wider"
+          >
+            [SEND]
+          </button>
 
-        <button
-          onClick={() => handleBatch(10)}
-          disabled={!prompt.trim() || isLoading}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold flex items-center justify-center gap-1"
-        >
-          <span>⚡</span>
-          <span>Batch</span>
-        </button>
+          <button
+            onClick={() => handleBatch(10)}
+            disabled={!prompt.trim() || isLoading}
+            className="border-2 border-cyber-green bg-cyber-bg text-cyber-green hover:bg-cyber-green hover:text-cyber-bg disabled:opacity-40 disabled:cursor-not-allowed transition-all p-2 font-bold tracking-wider"
+          >
+            [BATCH]
+          </button>
 
-        <button
-          onClick={onStressTest}
-          disabled={isLoading}
-          className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold flex items-center justify-center gap-1"
-        >
-          <span>🔥</span>
-          <span>Stress</span>
-        </button>
+          <button
+            onClick={onStressTest}
+            disabled={isLoading}
+            className="border-2 border-cyber-magenta bg-cyber-bg text-cyber-magenta hover:bg-cyber-magenta hover:text-cyber-bg disabled:opacity-40 disabled:cursor-not-allowed transition-all p-2 font-bold tracking-wider"
+          >
+            [STRESS]
+          </button>
 
-        <button
-          onClick={onCacheTest}
-          disabled={isLoading}
-          className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold flex items-center justify-center gap-1"
-        >
-          <span>📋</span>
-          <span>Cache</span>
-        </button>
+          <button
+            onClick={onCacheTest}
+            disabled={isLoading}
+            className="border-2 border-cyber-yellow bg-cyber-bg text-cyber-yellow hover:bg-cyber-yellow hover:text-cyber-bg disabled:opacity-40 disabled:cursor-not-allowed transition-all p-2 font-bold tracking-wider"
+          >
+            [CACHE]
+          </button>
+        </div>
       </div>
 
       {/* Loading Indicator */}
       {isLoading && (
-        <div className="glass rounded-lg px-3 py-2 flex items-center gap-2 text-xs">
-          <div className="w-3 h-3 border-2 border-redhat-red border-t-transparent rounded-full animate-spin" />
-          <span className="text-gray-300">Processing...</span>
+        <div className="border border-cyber-cyan bg-cyber-bg px-3 py-2 flex items-center gap-2 animate-fadeIn">
+          <div className="w-2 h-2 bg-cyber-cyan animate-pulseNeon" />
+          <span className="text-cyber-cyan">PROCESSING<span className="cursor-blink"></span></span>
         </div>
       )}
     </div>
