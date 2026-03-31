@@ -136,8 +136,9 @@ async def run_game_mode(mode: GameMode):
             traffic_manager.set_auto_spawn_rate(i)
             await asyncio.sleep(5)
 
-    elif mode == GameMode.RUSH:
-        # Maximum stress
+    elif mode == GameMode.BLACK_FRIDAY:
+        # Maximum stress - Black Friday sale simulation
+        print("🛍️ BLACK FRIDAY MODE: Simulating massive traffic spike!")
         traffic_manager.set_auto_spawn_rate(100)
         await asyncio.sleep(30)
         traffic_manager.set_auto_spawn_rate(40)

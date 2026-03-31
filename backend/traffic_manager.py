@@ -5,6 +5,7 @@ import uuid
 import os
 from typing import Dict, List, Optional
 from openai import AsyncOpenAI
+from collections import deque
 
 from models import (
     VehicleType, LaneStatus, Vehicle, Lane, Metrics
@@ -21,6 +22,17 @@ class TrafficManager:
         self.cache_hits = 0
         self.similar_prompts_cache = {}
 
+        # Real metrics tracking
+        self.latency_window = deque(maxlen=100)  # Last 100 requests
+        self.replica_queue_depth = {"replica-1": 0, "replica-2": 0, "replica-3": 0}
+        self.replica_total_requests = {"replica-1": 0, "replica-2": 0, "replica-3": 0}
+
+        # Prefix cache tracking for smart routing
+        self.prompt_to_replica = {}  # Map similar prompts to replicas for cache hits
+
+        # Track start time for throughput calculations
+        self.start_time = time.time()
+
         # Initialize vLLM clients
         self.vllm_clients = self._init_vllm_clients()
 
@@ -28,18 +40,21 @@ class TrafficManager:
         self._init_lanes()
 
     def _init_vllm_clients(self) -> Dict[str, AsyncOpenAI]:
-        """Initialize vLLM client connections"""
+        """Initialize vLLM client connections - 3 separate vLLM instances"""
         clients = {}
 
-        # For now, use single vllm-server endpoint for all replicas
-        # In production with LLM-D, each would be a separate replica
-        base_url = os.getenv("VLLM_REPLICA_1_URL", "http://vllm-server:8000/v1")
+        # Three separate vLLM endpoints on different ports
+        replica_urls = {
+            "replica-1": os.getenv("VLLM_REPLICA_1_URL", "http://localhost:8001/v1"),
+            "replica-2": os.getenv("VLLM_REPLICA_2_URL", "http://localhost:8002/v1"),
+            "replica-3": os.getenv("VLLM_REPLICA_3_URL", "http://localhost:8003/v1"),
+        }
 
-        for i in range(1, 4):
-            replica_url = os.getenv(f"VLLM_REPLICA_{i}_URL", base_url)
-            clients[f"replica-{i}"] = AsyncOpenAI(
+        for replica_id, url in replica_urls.items():
+            clients[replica_id] = AsyncOpenAI(
                 api_key="EMPTY",
-                base_url=replica_url
+                base_url=url,
+                timeout=30.0
             )
 
         return clients
@@ -80,8 +95,11 @@ class TrafficManager:
         # Generate prompt based on vehicle type
         prompt, max_tokens = self._generate_prompt(vehicle_type, use_similar_prompt)
 
-        # Assign to lane (load balancing)
-        lane_id = self._select_lane(vehicle_type)
+        # Check if this will be a cache hit
+        is_cached = prompt in self.prompt_to_replica
+
+        # Assign to lane (smart load balancing + cache-aware routing)
+        lane_id = self._select_lane(vehicle_type, prompt)
 
         # Create vehicle
         vehicle = Vehicle(
@@ -92,14 +110,15 @@ class TrafficManager:
             speed=self._get_vehicle_speed(vehicle_type),
             promptTokens=len(prompt.split()),
             generatedTokens=0,
-            cached=use_similar_prompt and prompt in self.similar_prompts_cache
+            cached=is_cached
         )
 
         self.vehicles[vehicle_id] = vehicle
 
-        # Increment lane vehicle count
+        # Increment lane vehicle count and queue depth
         if lane_id in self.lanes:
             self.lanes[lane_id].currentVehicles += 1
+            self.replica_queue_depth[lane_id] += 1
 
         # Start inference task
         asyncio.create_task(self._run_inference(vehicle, prompt, max_tokens))
@@ -126,16 +145,29 @@ class TrafficManager:
 
         return base_prompt, max_tokens
 
-    def _select_lane(self, vehicle_type: VehicleType) -> str:
-        """Select lane for vehicle (load balancing)"""
-        # Simple round-robin for active lanes
+    def _select_lane(self, vehicle_type: VehicleType, prompt: str = "") -> str:
+        """Select lane for vehicle (smart load balancing + cache-aware routing)"""
         active_lanes = [lid for lid, lane in self.lanes.items() if lane.status == LaneStatus.ACTIVE]
 
         if not active_lanes:
             return "replica-1"  # Fallback
 
-        # Find least loaded lane
-        return min(active_lanes, key=lambda lid: self.lanes[lid].load)
+        # CACHE-AWARE ROUTING: Check if similar prompt was sent before
+        # Route to the same replica for prefix cache hits
+        if prompt and prompt in self.prompt_to_replica:
+            cached_replica = self.prompt_to_replica[prompt]
+            if cached_replica in active_lanes:
+                # Cache hit! Route to same replica
+                return cached_replica
+
+        # LOAD BALANCING: Find least loaded lane based on queue depth
+        selected_lane = min(active_lanes, key=lambda lid: self.replica_queue_depth.get(lid, 0))
+
+        # Remember this prompt -> replica mapping for future cache hits
+        if prompt:
+            self.prompt_to_replica[prompt] = selected_lane
+
+        return selected_lane
 
     def _get_vehicle_speed(self, vehicle_type: VehicleType) -> float:
         """Get vehicle speed multiplier"""
@@ -149,17 +181,19 @@ class TrafficManager:
         return speeds.get(vehicle_type, 3.0)
 
     async def _run_inference(self, vehicle: Vehicle, prompt: str, max_tokens: int):
-        """Run actual vLLM inference"""
+        """Run actual vLLM inference and collect real metrics"""
+        lane_id = vehicle.laneId
+        start_time = time.time()
+
         try:
-            client = self.vllm_clients.get(vehicle.laneId)
+            client = self.vllm_clients.get(lane_id)
             if not client:
+                print(f"No client for lane {lane_id}")
                 return
 
-            start_time = time.time()
-
-            # Stream tokens
+            # Stream tokens from vLLM
             stream = await client.chat.completions.create(
-                model=os.getenv("MODEL_NAME", "mistralai/Mistral-7B-Instruct-v0.3"),
+                model=os.getenv("MODEL_NAME", "Qwen/Qwen2.5-0.5B-Instruct"),
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=max_tokens,
                 stream=True,
@@ -167,29 +201,47 @@ class TrafficManager:
             )
 
             token_count = 0
+            first_token_time = None
+
             async for chunk in stream:
                 if chunk.choices and chunk.choices[0].delta.content:
+                    if first_token_time is None:
+                        first_token_time = time.time()
+
                     token_count += 1
                     vehicle.generatedTokens = token_count
                     # Update position (0.0 to 1.0 based on progress)
                     vehicle.position = min(1.0, token_count / max_tokens)
 
-            # Update metrics
-            latency = time.time() - start_time
+            # Calculate real metrics
+            end_time = time.time()
+            total_latency = end_time - start_time
+            ttft = (first_token_time - start_time) if first_token_time else total_latency
+
+            # Record metrics
+            self.latency_window.append(total_latency)
             self.total_requests += 1
             self.total_tokens += token_count
+            self.replica_total_requests[lane_id] += 1
 
             if vehicle.cached:
                 self.cache_hits += 1
+                print(f"✅ Cache hit! Vehicle {vehicle.id[:8]} routed to {lane_id} (TTFT: {ttft:.3f}s)")
+            else:
+                print(f"🚗 Vehicle {vehicle.id[:8]} completed on {lane_id} ({token_count} tokens, {total_latency:.2f}s)")
 
         except Exception as e:
-            print(f"Inference error for vehicle {vehicle.id}: {e}")
+            print(f"❌ Inference error for vehicle {vehicle.id} on {lane_id}: {e}")
         finally:
+            # Decrement queue depth
+            if lane_id in self.replica_queue_depth:
+                self.replica_queue_depth[lane_id] = max(0, self.replica_queue_depth[lane_id] - 1)
+
             # Remove vehicle
             if vehicle.id in self.vehicles:
                 del self.vehicles[vehicle.id]
-            if vehicle.laneId in self.lanes:
-                self.lanes[vehicle.laneId].currentVehicles = max(0, self.lanes[vehicle.laneId].currentVehicles - 1)
+            if lane_id in self.lanes:
+                self.lanes[lane_id].currentVehicles = max(0, self.lanes[lane_id].currentVehicles - 1)
 
     def set_auto_spawn_rate(self, rate: int):
         """Set automatic vehicle spawn rate (0-100)"""
@@ -209,36 +261,50 @@ class TrafficManager:
             self.lanes[lane_id].status = LaneStatus.ACTIVE
 
     def update_metrics(self):
-        """Update lane metrics"""
-        for lane in self.lanes.values():
+        """Update lane metrics based on real queue depth and request data"""
+        for lane_id, lane in self.lanes.items():
             if lane.status == LaneStatus.ACTIVE:
-                # Simulate load based on current vehicles
-                lane.load = min(100, (lane.currentVehicles / 10) * 100)
-                lane.requestsPerSec = lane.currentVehicles * random.uniform(0.8, 1.2)
+                # Real load based on queue depth (normalize to 0-100)
+                queue_depth = self.replica_queue_depth.get(lane_id, 0)
+                lane.load = min(100, (queue_depth / 5) * 100)  # 5+ requests = 100% load
 
-        # Auto-scaling logic
-        avg_load = sum(l.load for l in self.lanes.values() if l.status == LaneStatus.ACTIVE) / max(1, len([l for l in self.lanes.values() if l.status == LaneStatus.ACTIVE]))
+                # Calculate requests/sec (moving average)
+                total_reqs = self.replica_total_requests.get(lane_id, 0)
+                lane.requestsPerSec = total_reqs / max(1, time.time() - getattr(self, 'start_time', time.time()))
 
-        if avg_load > 80:
-            # Open a closed lane
+        # Auto-scaling logic based on real load
+        active_lanes_list = [l for l in self.lanes.values() if l.status == LaneStatus.ACTIVE]
+        if not active_lanes_list:
+            return
+
+        avg_load = sum(l.load for l in active_lanes_list) / len(active_lanes_list)
+
+        # Scale up if average load > 70%
+        if avg_load > 70:
             for lane in self.lanes.values():
                 if lane.status == LaneStatus.CLOSED:
+                    print(f"📈 Auto-scaling UP: Opening {lane.id} (avg load: {avg_load:.1f}%)")
                     asyncio.create_task(self.open_lane(lane.id))
                     break
 
-        elif avg_load < 20:
-            # Close an active lane (scale to zero)
-            active_lanes = [l for l in self.lanes.values() if l.status == LaneStatus.ACTIVE]
-            if len(active_lanes) > 1:
-                asyncio.create_task(self.close_lane(active_lanes[-1].id))
+        # Scale down if average load < 15% and we have multiple replicas
+        elif avg_load < 15 and len(active_lanes_list) > 1:
+            print(f"📉 Auto-scaling DOWN: Closing replica (avg load: {avg_load:.1f}%)")
+            asyncio.create_task(self.close_lane(active_lanes_list[-1].id))
 
     def get_metrics(self) -> Metrics:
-        """Get current metrics"""
+        """Get current metrics from real inference data"""
         active_lanes = len([l for l in self.lanes.values() if l.status == LaneStatus.ACTIVE])
 
+        # Calculate real average latency from recent requests
+        avg_latency = sum(self.latency_window) / len(self.latency_window) if self.latency_window else 0.0
+
+        # Calculate throughput based on requests per lane
+        total_throughput = sum(l.requestsPerSec for l in self.lanes.values())
+
         return Metrics(
-            throughput=sum(l.requestsPerSec for l in self.lanes.values()),
-            avgLatency=random.uniform(0.5, 2.0),  # TODO: Calculate from actual requests
+            throughput=total_throughput,
+            avgLatency=avg_latency,
             cacheHitRate=(self.cache_hits / max(1, self.total_requests)) * 100,
             activeLanes=active_lanes,
             totalLanes=len(self.lanes),

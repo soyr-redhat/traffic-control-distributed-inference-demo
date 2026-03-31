@@ -15,12 +15,12 @@ class LaneStatus(str, Enum):
     CLOSED = "closed"
 
 class GameMode(str, Enum):
-    MORNING = "morning"
-    RUSH = "rush"
-    CONVOY = "convoy"
-    NIGHT = "night"
-    CONSTRUCTION = "construction"
-    SPEED = "speed"
+    MORNING = "morning"          # Gradual ramp-up
+    BLACK_FRIDAY = "black_friday"  # Maximum stress test
+    CONVOY = "convoy"            # Cache testing
+    NIGHT = "night"              # Scale to zero
+    CONSTRUCTION = "construction"  # Failure handling
+    SPEED = "speed"              # Throughput race
 
 class SpawnRequest(BaseModel):
     vehicleType: VehicleType

@@ -8,9 +8,9 @@ const GameModeSelector = ({ currentMode, onModeChange }) => {
       color: 'from-orange-500 to-yellow-500'
     },
     {
-      id: 'rush',
-      name: 'Rush Hour',
-      icon: '🚨',
+      id: 'black_friday',
+      name: 'Black Friday Rush',
+      icon: '🛍️',
       description: 'Maximum stress test',
       color: 'from-red-500 to-pink-500'
     },
