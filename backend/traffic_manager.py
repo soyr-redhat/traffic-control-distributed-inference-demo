@@ -88,12 +88,16 @@ class TrafficManager:
             ),
         }
 
-    def spawn_vehicle(self, vehicle_type: VehicleType, use_similar_prompt: bool = False) -> Vehicle:
+    def spawn_vehicle(self, vehicle_type: VehicleType, use_similar_prompt: bool = False, custom_prompt: str = None) -> Vehicle:
         """Spawn a new vehicle (inference request)"""
         vehicle_id = str(uuid.uuid4())
 
-        # Generate prompt based on vehicle type
-        prompt, max_tokens = self._generate_prompt(vehicle_type, use_similar_prompt)
+        # Generate prompt based on vehicle type or use custom
+        if custom_prompt:
+            prompt = custom_prompt
+            max_tokens = 100  # Default for custom prompts
+        else:
+            prompt, max_tokens = self._generate_prompt(vehicle_type, use_similar_prompt)
 
         # Check if this will be a cache hit
         is_cached = prompt in self.prompt_to_replica

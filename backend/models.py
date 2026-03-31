@@ -24,6 +24,7 @@ class GameMode(str, Enum):
 
 class SpawnRequest(BaseModel):
     vehicleType: VehicleType
+    customPrompt: Optional[str] = None  # Allow custom prompts
 
 class GameModeRequest(BaseModel):
     mode: Optional[GameMode] = None

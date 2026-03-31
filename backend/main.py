@@ -43,7 +43,10 @@ async def root():
 @app.post("/api/spawn")
 async def spawn_vehicle(request: SpawnRequest):
     """Manually spawn a vehicle (inference request)"""
-    vehicle = traffic_manager.spawn_vehicle(request.vehicleType)
+    vehicle = traffic_manager.spawn_vehicle(
+        request.vehicleType,
+        custom_prompt=request.customPrompt
+    )
     await broadcast_update()
     return {"success": True, "vehicleId": vehicle.id}
 
