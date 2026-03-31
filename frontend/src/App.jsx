@@ -40,7 +40,6 @@ function App() {
       } else if (data.type === 'activity') {
         setLastActivity(data.activity)
 
-        // Add to recent activities
         const newActivity = {
           id: Date.now(),
           message: data.activity.cached
@@ -150,158 +149,180 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col">
-      {/* Compact Header */}
-      <header className="bg-black/50 backdrop-blur-lg border-b border-redhat-red/30 flex-shrink-0">
-        <div className="container mx-auto px-6 py-3">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex flex-col">
+      {/* Header with gradient */}
+      <header className="relative bg-gradient-to-r from-black via-gray-900 to-black border-b border-redhat-red/30 shadow-2xl backdrop-blur-xl flex-shrink-0">
+        <div className="absolute inset-0 bg-gradient-to-r from-redhat-red/10 via-transparent to-redhat-red/10" />
+        <div className="relative container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
-                <span className="text-redhat-red">🚦</span> LLM Traffic Control
-              </h1>
-              <p className="text-gray-400 text-xs mt-0.5">
-                Watch requests flow through distributed inference
-              </p>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-redhat-red to-pink-600 flex items-center justify-center shadow-lg shadow-redhat-red/50">
+                <span className="text-2xl">🚦</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+                  LLM Traffic Control
+                </h1>
+                <p className="text-gray-400 text-xs mt-0.5">
+                  Real-time distributed inference visualization
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => showInfo('llmd')}
-                className="glass hover:bg-white/10 transition-all rounded-lg px-3 py-2 text-xs"
-              >
-                <span className="mr-1">ℹ️</span> About LLM-D
-              </button>
-            </div>
+            <button
+              onClick={() => showInfo('llmd')}
+              className="glass hover:bg-white/10 transition-all rounded-xl px-4 py-2 text-sm border border-white/10 shadow-lg backdrop-blur-xl"
+            >
+              <span className="mr-2">ℹ️</span> About LLM-D
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content - Single Screen */}
-      <div className="flex-1 container mx-auto px-6 py-4 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
-          {/* Left Column - Controls & Metrics */}
-          <div className="space-y-4">
-            {/* Prompt Input - Compact */}
-            <div className="glass rounded-xl p-4">
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                <span className="text-redhat-red">✍️</span> Send Prompt
-                <button
-                  onClick={() => showInfo('router')}
-                  className="ml-auto text-gray-400 hover:text-white text-xs"
-                >
-                  ℹ️
-                </button>
-              </h3>
-              <PromptInput
-                onSendPrompt={handleSendPrompt}
-                onBatch={handleBatch}
-                onStressTest={handleStressTest}
-                onCacheTest={handleCacheTest}
-              />
-            </div>
-
-            {/* Metrics - Compact */}
-            <div className="glass rounded-xl p-4">
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                <span className="text-redhat-red">📊</span> Metrics
-                <button
-                  onClick={() => showInfo('metrics')}
-                  className="ml-auto text-gray-400 hover:text-white text-xs"
-                >
-                  ℹ️
-                </button>
-              </h3>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="glass rounded-lg p-2 text-center">
-                  <div className="text-lg font-bold text-redhat-red">
-                    {metrics.throughput.toFixed(1)}
-                  </div>
-                  <div className="text-xs text-gray-400">tok/s</div>
+      {/* Main Content */}
+      <div className="flex-1 container mx-auto px-6 py-6 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
+          {/* Left Sidebar - Controls & Metrics */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Prompt Input */}
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl bg-gradient-to-br from-gray-900/90 to-gray-950/90">
+              <div className="absolute inset-0 bg-gradient-to-br from-redhat-red/5 via-transparent to-blue-500/5" />
+              <div className="relative p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span className="text-xl">✍️</span> Send Prompt
+                  </h3>
+                  <button
+                    onClick={() => showInfo('router')}
+                    className="text-gray-400 hover:text-white text-xs transition-colors"
+                  >
+                    ℹ️
+                  </button>
                 </div>
-                <div className="glass rounded-lg p-2 text-center">
-                  <div className="text-lg font-bold text-green-400">
-                    {metrics.cacheHitRate.toFixed(0)}%
-                  </div>
-                  <div className="text-xs text-gray-400">Cache</div>
-                </div>
-                <div className="glass rounded-lg p-2 text-center">
-                  <div className="text-lg font-bold text-blue-400">
-                    {metrics.avgLatency.toFixed(2)}s
-                  </div>
-                  <div className="text-xs text-gray-400">Latency</div>
-                </div>
-                <div className="glass rounded-lg p-2 text-center">
-                  <div className="text-lg font-bold text-purple-400">
-                    {metrics.activeLanes}/{metrics.totalLanes}
-                  </div>
-                  <div className="text-xs text-gray-400">Active</div>
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">
-                <div className="flex justify-between">
-                  <span>Requests:</span>
-                  <span className="text-white font-semibold">{metrics.totalRequests}</span>
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span>Tokens:</span>
-                  <span className="text-white font-semibold">{metrics.totalTokens.toLocaleString()}</span>
-                </div>
+                <PromptInput
+                  onSendPrompt={handleSendPrompt}
+                  onBatch={handleBatch}
+                  onStressTest={handleStressTest}
+                  onCacheTest={handleCacheTest}
+                />
               </div>
             </div>
 
-            {/* Recent Activity - Compact */}
-            <div className="glass rounded-xl p-4 flex-1">
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                <span className="text-redhat-red">📡</span> Recent Activity
-              </h3>
-              <div className="space-y-2">
-                {recentActivities.length === 0 ? (
-                  <div className="text-xs text-gray-500 text-center py-4">
-                    Send a prompt to see activity...
-                  </div>
-                ) : (
-                  recentActivities.map(activity => (
-                    <div key={activity.id} className="glass rounded px-2 py-1.5 text-xs animate-fadeIn">
-                      <div className="text-gray-200">{activity.message}</div>
-                      <div className="text-gray-500 text-xs mt-0.5">{activity.timestamp}</div>
+            {/* Metrics */}
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl bg-gradient-to-br from-gray-900/90 to-gray-950/90">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-purple-500/5" />
+              <div className="relative p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span className="text-xl">📊</span> Metrics
+                  </h3>
+                  <button
+                    onClick={() => showInfo('metrics')}
+                    className="text-gray-400 hover:text-white text-xs transition-colors"
+                  >
+                    ℹ️
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-red-900/20 to-red-950/20 p-3 text-center">
+                    <div className="text-2xl font-bold bg-gradient-to-r from-red-400 to-pink-500 bg-clip-text text-transparent">
+                      {metrics.throughput.toFixed(1)}
                     </div>
-                  ))
-                )}
+                    <div className="text-xs text-gray-400 mt-1">tok/s</div>
+                  </div>
+                  <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-green-900/20 to-emerald-950/20 p-3 text-center">
+                    <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+                      {metrics.cacheHitRate.toFixed(0)}%
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">Cache</div>
+                  </div>
+                  <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-blue-900/20 to-blue-950/20 p-3 text-center">
+                    <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent">
+                      {metrics.avgLatency.toFixed(2)}s
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">Latency</div>
+                  </div>
+                  <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-purple-900/20 to-purple-950/20 p-3 text-center">
+                    <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                      {metrics.activeLanes}/{metrics.totalLanes}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">Active</div>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-white/10 space-y-2 text-xs">
+                  <div className="flex justify-between text-gray-400">
+                    <span>Total Requests:</span>
+                    <span className="text-white font-semibold">{metrics.totalRequests}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-400">
+                    <span>Total Tokens:</span>
+                    <span className="text-white font-semibold">{metrics.totalTokens.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl bg-gradient-to-br from-gray-900/90 to-gray-950/90 flex-1">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5" />
+              <div className="relative p-5">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
+                  <span className="text-xl">📡</span> Recent Activity
+                </h3>
+                <div className="space-y-2">
+                  {recentActivities.length === 0 ? (
+                    <div className="text-xs text-gray-500 text-center py-8">
+                      Waiting for activity...
+                    </div>
+                  ) : (
+                    recentActivities.map(activity => (
+                      <div key={activity.id} className="relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-r from-white/5 to-transparent p-3 text-xs backdrop-blur-sm animate-fadeIn">
+                        <div className="text-gray-200">{activity.message}</div>
+                        <div className="text-gray-500 text-xs mt-1">{activity.timestamp}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right Column - Network Visualization (spans 2 columns) */}
-          <div className="lg:col-span-2">
-            <div className="glass rounded-xl p-4 h-full flex flex-col">
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                <span className="text-redhat-red">🕸️</span> Request Flow Network
-                <button
-                  onClick={() => showInfo('caching')}
-                  className="ml-auto text-gray-400 hover:text-white text-xs"
-                >
-                  ℹ️ Cache Info
-                </button>
-              </h3>
-              <div className="flex-1">
-                <NetworkVisual lanes={lanes} lastActivity={lastActivity} />
+          {/* Right - Network Visualization */}
+          <div className="lg:col-span-3">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl h-full">
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-900/50 to-gray-950/50 backdrop-blur-xl" />
+              <div className="relative h-full flex flex-col p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span className="text-2xl">🕸️</span> Request Flow Network
+                  </h3>
+                  <button
+                    onClick={() => showInfo('caching')}
+                    className="text-gray-400 hover:text-white text-sm transition-colors glass rounded-lg px-3 py-1.5 border border-white/10"
+                  >
+                    ℹ️ Learn More
+                  </button>
+                </div>
+                <div className="flex-1">
+                  <NetworkVisual lanes={lanes} lastActivity={lastActivity} />
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Compact Footer */}
-      <footer className="py-3 border-t border-gray-800 bg-black/30 flex-shrink-0">
+      {/* Footer */}
+      <footer className="py-4 border-t border-white/10 bg-black/50 backdrop-blur-xl flex-shrink-0">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between text-xs">
             <div className="text-gray-500">
               Powered by <span className="text-redhat-red font-semibold">LLM-D</span> + vLLM • Real distributed inference
             </div>
-            <div className="flex gap-3 text-gray-400">
-              <button onClick={() => showInfo('router')} className="hover:text-white">
+            <div className="flex gap-4 text-gray-400">
+              <button onClick={() => showInfo('router')} className="hover:text-white transition-colors">
                 How It Works
               </button>
-              <button onClick={() => showInfo('caching')} className="hover:text-white">
+              <button onClick={() => showInfo('caching')} className="hover:text-white transition-colors">
                 Prefix Caching
               </button>
             </div>
