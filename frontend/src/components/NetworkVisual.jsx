@@ -142,7 +142,7 @@ const ReplicaNode = ({ replica, x, y, isActive, isCacheHit }) => {
 const NetworkVisual = ({ lanes, lastActivity }) => {
   const [activeConnections, setActiveConnections] = useState({})
   const [cacheHits, setCacheHits] = useState({})
-  const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
+  const [dimensions, setDimensions] = useState({ width: 1000, height: 600 })
 
   useEffect(() => {
     if (lastActivity?.replicaId) {
@@ -176,7 +176,7 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
   }
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border border-white/10 min-h-[500px]">
+    <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border border-white/10">
       {/* Grid background */}
       <div className="absolute inset-0 opacity-20" style={{
         backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',

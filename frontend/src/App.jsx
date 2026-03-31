@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import PromptInput from './components/PromptInput'
+import ChatInput from './components/ChatInput'
 import NetworkVisual from './components/NetworkVisual'
 import InfoModal from './components/InfoModal'
 
@@ -167,146 +167,119 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex-1 container mx-auto px-6 py-6 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
-          {/* Left Column - Controls & Metrics */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Prompt Input */}
-            <div className="glass rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-white">Send Prompt</h3>
-                <button
-                  onClick={() => {
-                    setInfoTopic('router')
-                    setInfoModalOpen(true)
-                  }}
-                  className="text-gray-400 hover:text-white text-xs"
-                >
-                  ℹ️
-                </button>
-              </div>
-              <PromptInput
-                onSendPrompt={handleSendPrompt}
-                onBatch={handleBatch}
-                onStressTest={handleStressTest}
-                onCacheTest={handleCacheTest}
-              />
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar - Metrics */}
+        <div className="w-72 border-r border-white/10 bg-black/30 backdrop-blur-sm p-4 space-y-4 overflow-y-auto flex-shrink-0">
+          {/* Metrics */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-white">Metrics</h3>
+              <button
+                onClick={() => {
+                  setInfoTopic('metrics')
+                  setInfoModalOpen(true)
+                }}
+                className="text-gray-400 hover:text-white text-xs"
+              >
+                ℹ️
+              </button>
             </div>
-
-            {/* Metrics */}
-            <div className="glass rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-white">Metrics</h3>
-                <button
-                  onClick={() => {
-                    setInfoTopic('metrics')
-                    setInfoModalOpen(true)
-                  }}
-                  className="text-gray-400 hover:text-white text-xs"
-                >
-                  ℹ️
-                </button>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="glass rounded-lg p-2.5 text-center">
+                <div className="text-xl font-bold text-redhat-red">
+                  {metrics.throughput.toFixed(1)}
+                </div>
+                <div className="text-xs text-gray-400 mt-0.5">tok/s</div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="glass rounded-lg p-3 text-center">
-                  <div className="text-2xl font-bold text-redhat-red">
-                    {metrics.throughput.toFixed(1)}
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1">tok/s</div>
+              <div className="glass rounded-lg p-2.5 text-center">
+                <div className="text-xl font-bold text-green-400">
+                  {metrics.cacheHitRate.toFixed(0)}%
                 </div>
-                <div className="glass rounded-lg p-3 text-center">
-                  <div className="text-2xl font-bold text-green-400">
-                    {metrics.cacheHitRate.toFixed(0)}%
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1">Cache</div>
-                </div>
-                <div className="glass rounded-lg p-3 text-center">
-                  <div className="text-2xl font-bold text-blue-400">
-                    {metrics.avgLatency.toFixed(2)}s
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1">Latency</div>
-                </div>
-                <div className="glass rounded-lg p-3 text-center">
-                  <div className="text-2xl font-bold text-purple-400">
-                    {metrics.activeLanes}/{metrics.totalLanes}
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1">Active</div>
-                </div>
+                <div className="text-xs text-gray-400 mt-0.5">Cache</div>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-700 text-xs space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Requests:</span>
-                  <span className="text-white font-semibold">{metrics.totalRequests}</span>
+              <div className="glass rounded-lg p-2.5 text-center">
+                <div className="text-xl font-bold text-blue-400">
+                  {metrics.avgLatency.toFixed(2)}s
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Tokens:</span>
-                  <span className="text-white font-semibold">{metrics.totalTokens.toLocaleString()}</span>
+                <div className="text-xs text-gray-400 mt-0.5">Latency</div>
+              </div>
+              <div className="glass rounded-lg p-2.5 text-center">
+                <div className="text-xl font-bold text-purple-400">
+                  {metrics.activeLanes}/{metrics.totalLanes}
                 </div>
+                <div className="text-xs text-gray-400 mt-0.5">Active</div>
               </div>
             </div>
-
-            {/* Activity Log */}
-            <div className="glass rounded-2xl p-5 flex-1">
-              <h3 className="text-sm font-bold text-white mb-4">Recent Activity</h3>
-              <div className="space-y-2">
-                {recentActivities.length === 0 ? (
-                  <div className="text-xs text-gray-500 text-center py-8">
-                    Waiting for activity...
-                  </div>
-                ) : (
-                  recentActivities.map(activity => (
-                    <div key={activity.id} className="glass rounded-lg px-3 py-2 text-xs animate-fadeIn">
-                      <div className="text-gray-200">{activity.message}</div>
-                      <div className="text-gray-500 mt-1">{activity.timestamp}</div>
-                    </div>
-                  ))
-                )}
+            <div className="mt-3 pt-3 border-t border-gray-700 text-xs space-y-1.5">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Requests:</span>
+                <span className="text-white font-semibold">{metrics.totalRequests}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Tokens:</span>
+                <span className="text-white font-semibold">{metrics.totalTokens.toLocaleString()}</span>
               </div>
             </div>
           </div>
 
-          {/* Right Column - Network Visualization */}
-          <div className="lg:col-span-3">
-            <div className="h-full flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-white">Request Flow Network</h3>
-                <button
-                  onClick={() => {
-                    setInfoTopic('caching')
-                    setInfoModalOpen(true)
-                  }}
-                  className="glass rounded-lg px-3 py-2 text-sm hover:bg-white/10 transition-all"
-                >
-                  ℹ️ Learn More
-                </button>
-              </div>
-              <div className="flex-1 min-h-[500px]">
-                <NetworkVisual lanes={lanes} lastActivity={lastActivity} />
-              </div>
+          {/* Activity Log */}
+          <div>
+            <h3 className="text-sm font-bold text-white mb-3">Recent Activity</h3>
+            <div className="space-y-2">
+              {recentActivities.length === 0 ? (
+                <div className="text-xs text-gray-500 text-center py-4">
+                  Waiting for activity...
+                </div>
+              ) : (
+                recentActivities.map(activity => (
+                  <div key={activity.id} className="glass rounded-lg px-2.5 py-2 text-xs animate-fadeIn">
+                    <div className="text-gray-200">{activity.message}</div>
+                    <div className="text-gray-500 mt-0.5">{activity.timestamp}</div>
+                  </div>
+                ))
+              )}
             </div>
+          </div>
+
+          {/* Help Links */}
+          <div className="pt-3 border-t border-gray-700">
+            <div className="text-xs text-gray-400 mb-2">Learn More</div>
+            <div className="space-y-1.5">
+              <button
+                onClick={() => { setInfoTopic('router'); setInfoModalOpen(true); }}
+                className="w-full text-left glass hover:bg-white/10 rounded-lg px-2.5 py-2 text-xs transition-all"
+              >
+                🧠 How Routing Works
+              </button>
+              <button
+                onClick={() => { setInfoTopic('caching'); setInfoModalOpen(true); }}
+                className="w-full text-left glass hover:bg-white/10 rounded-lg px-2.5 py-2 text-xs transition-all"
+              >
+                ⚡ Prefix Caching
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Center - Network Visualization & Chat */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Network Visualization */}
+          <div className="flex-1 p-4 min-h-0">
+            <NetworkVisual lanes={lanes} lastActivity={lastActivity} />
+          </div>
+
+          {/* Chat Input - Bottom Center */}
+          <div className="p-4 pt-0">
+            <ChatInput
+              onSendPrompt={handleSendPrompt}
+              onBatch={handleBatch}
+              onStressTest={handleStressTest}
+              onCacheTest={handleCacheTest}
+            />
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="relative py-4 border-t border-gray-800 bg-black/50 backdrop-blur-lg z-10">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between text-xs">
-            <div className="text-gray-500">
-              Powered by <span className="text-redhat-red font-semibold">LLM-D</span> + vLLM
-            </div>
-            <div className="flex gap-4 text-gray-400">
-              <button onClick={() => { setInfoTopic('router'); setInfoModalOpen(true); }} className="hover:text-white">
-                How It Works
-              </button>
-              <button onClick={() => { setInfoTopic('caching'); setInfoModalOpen(true); }} className="hover:text-white">
-                Prefix Caching
-              </button>
-            </div>
-          </div>
-        </div>
-      </footer>
 
       {/* Info Modal */}
       <InfoModal
