@@ -156,19 +156,27 @@ class TrafficManager:
         if not active_lanes:
             return "replica-1"  # Fallback
 
-        # CACHE-AWARE ROUTING: Check if similar prompt was sent before
-        # Route to the same replica for prefix cache hits
-        if prompt and prompt in self.prompt_to_replica:
+        # CACHE-AWARE ROUTING: Check if EXACT prompt was sent before
+        # Only route to same replica if prompt is identical (for real cache hits)
+        if prompt and len(prompt) > 10 and prompt in self.prompt_to_replica:
             cached_replica = self.prompt_to_replica[prompt]
             if cached_replica in active_lanes:
                 # Cache hit! Route to same replica
+                print(f"🎯 Cache routing: '{prompt[:50]}...' → {cached_replica}")
                 return cached_replica
 
-        # LOAD BALANCING: Find least loaded lane based on queue depth
-        selected_lane = min(active_lanes, key=lambda lid: self.replica_queue_depth.get(lid, 0))
+        # LOAD BALANCING: Find least loaded lane based on queue depth + current load
+        # Use combination of queue depth and current vehicles for better distribution
+        def get_load_score(lid):
+            queue = self.replica_queue_depth.get(lid, 0)
+            current = self.lanes[lid].currentVehicles
+            return queue + current
 
-        # Remember this prompt -> replica mapping for future cache hits
-        if prompt:
+        selected_lane = min(active_lanes, key=get_load_score)
+
+        # Only remember CUSTOM prompts for cache routing (not default vehicle prompts)
+        # This prevents all default "car" requests from going to same replica
+        if prompt and len(prompt) > 20:  # Only cache non-trivial prompts
             self.prompt_to_replica[prompt] = selected_lane
 
         return selected_lane

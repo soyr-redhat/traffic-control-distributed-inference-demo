@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import PromptInput from './components/PromptInput'
-import RoutingVisual from './components/RoutingVisual'
-import ActivityFeed from './components/ActivityFeed'
+import NetworkVisual from './components/NetworkVisual'
 import InfoModal from './components/InfoModal'
 
 function App() {
@@ -22,6 +21,7 @@ function App() {
   const [lastActivity, setLastActivity] = useState(null)
   const [infoModalOpen, setInfoModalOpen] = useState(false)
   const [infoTopic, setInfoTopic] = useState('router')
+  const [recentActivities, setRecentActivities] = useState([])
 
   // WebSocket connection for real-time updates
   useEffect(() => {
@@ -39,6 +39,16 @@ function App() {
         setLanes(data.lanes)
       } else if (data.type === 'activity') {
         setLastActivity(data.activity)
+
+        // Add to recent activities
+        const newActivity = {
+          id: Date.now(),
+          message: data.activity.cached
+            ? `✅ Cache hit → ${data.activity.replicaName} (${data.activity.ttft?.toFixed(3)}s)`
+            : `🔀 Routed → ${data.activity.replicaName}`,
+          timestamp: new Date().toLocaleTimeString()
+        }
+        setRecentActivities(prev => [newActivity, ...prev].slice(0, 5))
       }
     }
 
@@ -51,7 +61,6 @@ function App() {
 
   const handleSendPrompt = async (prompt) => {
     try {
-      // Send as a single car request
       const response = await fetch('/api/spawn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,9 +71,6 @@ function App() {
       })
 
       if (!response.ok) throw new Error('Failed to send prompt')
-
-      const result = await response.json()
-      console.log('Prompt sent:', result)
     } catch (err) {
       console.error('Failed to send prompt:', err)
     }
@@ -72,7 +78,6 @@ function App() {
 
   const handleBatch = async (prompt, count) => {
     try {
-      // Send multiple identical requests to demonstrate cache hits
       for (let i = 0; i < count; i++) {
         await fetch('/api/spawn', {
           method: 'POST',
@@ -82,10 +87,8 @@ function App() {
             customPrompt: prompt
           })
         })
-        // Small delay between requests
         await new Promise(resolve => setTimeout(resolve, 100))
       }
-      console.log(`Batch of ${count} sent`)
     } catch (err) {
       console.error('Failed to send batch:', err)
     }
@@ -93,7 +96,6 @@ function App() {
 
   const handleStressTest = async () => {
     try {
-      // Send diverse requests to trigger auto-scaling
       const vehicleTypes = ['sport', 'car', 'truck', 'bus', 'ambulance']
 
       for (let i = 0; i < 50; i++) {
@@ -104,10 +106,8 @@ function App() {
           body: JSON.stringify({ vehicleType })
         }).catch(err => console.error('Spawn failed:', err))
 
-        // Don't await - send all at once for stress test
         await new Promise(resolve => setTimeout(resolve, 50))
       }
-      console.log('Stress test initiated')
     } catch (err) {
       console.error('Failed to run stress test:', err)
     }
@@ -115,45 +115,30 @@ function App() {
 
   const handleCacheTest = async () => {
     try {
-      // Send: A, B, A again to demonstrate cache hit
       const promptA = 'Explain quantum computing in simple terms.'
       const promptB = 'What is artificial intelligence?'
 
-      // Send A
       await fetch('/api/spawn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vehicleType: 'car',
-          customPrompt: promptA
-        })
+        body: JSON.stringify({ vehicleType: 'car', customPrompt: promptA })
       })
 
       await new Promise(resolve => setTimeout(resolve, 1000))
 
-      // Send B
       await fetch('/api/spawn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vehicleType: 'car',
-          customPrompt: promptB
-        })
+        body: JSON.stringify({ vehicleType: 'car', customPrompt: promptB })
       })
 
       await new Promise(resolve => setTimeout(resolve, 1000))
 
-      // Send A again - should be cache hit!
       await fetch('/api/spawn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vehicleType: 'car',
-          customPrompt: promptA
-        })
+        body: JSON.stringify({ vehicleType: 'car', customPrompt: promptA })
       })
-
-      console.log('Cache test completed')
     } catch (err) {
       console.error('Failed to run cache test:', err)
     }
@@ -165,87 +150,158 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      {/* Header */}
-      <header className="bg-black/50 backdrop-blur-lg border-b border-redhat-red/30">
-        <div className="container mx-auto px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col">
+      {/* Compact Header */}
+      <header className="bg-black/50 backdrop-blur-lg border-b border-redhat-red/30 flex-shrink-0">
+        <div className="container mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-display font-bold text-white flex items-center gap-3">
-                <span className="text-redhat-red">🚦</span> LLM Traffic Control Center
+              <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+                <span className="text-redhat-red">🚦</span> LLM Traffic Control
               </h1>
-              <p className="text-gray-400 text-sm font-text mt-1">
-                Watch your prompts flow through distributed inference
+              <p className="text-gray-400 text-xs mt-0.5">
+                Watch requests flow through distributed inference
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => showInfo('llmd')}
-                className="glass hover:bg-white/10 transition-all rounded-lg px-4 py-2 text-sm"
+                className="glass hover:bg-white/10 transition-all rounded-lg px-3 py-2 text-xs"
               >
-                <span className="text-lg mr-2">ℹ️</span>
-                What is LLM-D?
+                <span className="mr-1">ℹ️</span> About LLM-D
               </button>
-              <div className="text-right">
-                <div className="text-xs text-gray-400">Pillar 4</div>
-                <div className="text-sm font-semibold text-redhat-red">LLMs at Scale</div>
-              </div>
-              <div className="w-12 h-12 bg-redhat-red rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🚗</span>
-              </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-6 py-6 space-y-6">
-        {/* Prompt Input */}
-        <PromptInput
-          onSendPrompt={handleSendPrompt}
-          onBatch={handleBatch}
-          onStressTest={handleStressTest}
-          onCacheTest={handleCacheTest}
-        />
+      {/* Main Content - Single Screen */}
+      <div className="flex-1 container mx-auto px-6 py-4 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
+          {/* Left Column - Controls & Metrics */}
+          <div className="space-y-4">
+            {/* Prompt Input - Compact */}
+            <div className="glass rounded-xl p-4">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <span className="text-redhat-red">✍️</span> Send Prompt
+                <button
+                  onClick={() => showInfo('router')}
+                  className="ml-auto text-gray-400 hover:text-white text-xs"
+                >
+                  ℹ️
+                </button>
+              </h3>
+              <PromptInput
+                onSendPrompt={handleSendPrompt}
+                onBatch={handleBatch}
+                onStressTest={handleStressTest}
+                onCacheTest={handleCacheTest}
+              />
+            </div>
 
-        {/* Routing Visualization */}
-        <RoutingVisual
-          lanes={lanes}
-          lastActivity={lastActivity}
-        />
+            {/* Metrics - Compact */}
+            <div className="glass rounded-xl p-4">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <span className="text-redhat-red">📊</span> Metrics
+                <button
+                  onClick={() => showInfo('metrics')}
+                  className="ml-auto text-gray-400 hover:text-white text-xs"
+                >
+                  ℹ️
+                </button>
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="glass rounded-lg p-2 text-center">
+                  <div className="text-lg font-bold text-redhat-red">
+                    {metrics.throughput.toFixed(1)}
+                  </div>
+                  <div className="text-xs text-gray-400">tok/s</div>
+                </div>
+                <div className="glass rounded-lg p-2 text-center">
+                  <div className="text-lg font-bold text-green-400">
+                    {metrics.cacheHitRate.toFixed(0)}%
+                  </div>
+                  <div className="text-xs text-gray-400">Cache</div>
+                </div>
+                <div className="glass rounded-lg p-2 text-center">
+                  <div className="text-lg font-bold text-blue-400">
+                    {metrics.avgLatency.toFixed(2)}s
+                  </div>
+                  <div className="text-xs text-gray-400">Latency</div>
+                </div>
+                <div className="glass rounded-lg p-2 text-center">
+                  <div className="text-lg font-bold text-purple-400">
+                    {metrics.activeLanes}/{metrics.totalLanes}
+                  </div>
+                  <div className="text-xs text-gray-400">Active</div>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">
+                <div className="flex justify-between">
+                  <span>Requests:</span>
+                  <span className="text-white font-semibold">{metrics.totalRequests}</span>
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span>Tokens:</span>
+                  <span className="text-white font-semibold">{metrics.totalTokens.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
 
-        {/* Activity Feed */}
-        <ActivityFeed
-          metrics={metrics}
-          lanes={lanes}
-        />
+            {/* Recent Activity - Compact */}
+            <div className="glass rounded-xl p-4 flex-1">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <span className="text-redhat-red">📡</span> Recent Activity
+              </h3>
+              <div className="space-y-2">
+                {recentActivities.length === 0 ? (
+                  <div className="text-xs text-gray-500 text-center py-4">
+                    Send a prompt to see activity...
+                  </div>
+                ) : (
+                  recentActivities.map(activity => (
+                    <div key={activity.id} className="glass rounded px-2 py-1.5 text-xs animate-fadeIn">
+                      <div className="text-gray-200">{activity.message}</div>
+                      <div className="text-gray-500 text-xs mt-0.5">{activity.timestamp}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Network Visualization (spans 2 columns) */}
+          <div className="lg:col-span-2">
+            <div className="glass rounded-xl p-4 h-full flex flex-col">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <span className="text-redhat-red">🕸️</span> Request Flow Network
+                <button
+                  onClick={() => showInfo('caching')}
+                  className="ml-auto text-gray-400 hover:text-white text-xs"
+                >
+                  ℹ️ Cache Info
+                </button>
+              </h3>
+              <div className="flex-1">
+                <NetworkVisual lanes={lanes} lastActivity={lastActivity} />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-12 py-6 border-t border-gray-800">
+      {/* Compact Footer */}
+      <footer className="py-3 border-t border-gray-800 bg-black/30 flex-shrink-0">
         <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between">
-            <div className="text-gray-500 text-sm">
-              <p>Powered by <span className="text-redhat-red font-semibold">LLM-D</span> + vLLM on OpenShift</p>
-              <p className="mt-1">Real distributed inference with {metrics.totalLanes} replicas</p>
+          <div className="flex items-center justify-between text-xs">
+            <div className="text-gray-500">
+              Powered by <span className="text-redhat-red font-semibold">LLM-D</span> + vLLM • Real distributed inference
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => showInfo('router')}
-                className="text-gray-400 hover:text-white transition-colors text-sm"
-              >
-                How Routing Works
+            <div className="flex gap-3 text-gray-400">
+              <button onClick={() => showInfo('router')} className="hover:text-white">
+                How It Works
               </button>
-              <button
-                onClick={() => showInfo('metrics')}
-                className="text-gray-400 hover:text-white transition-colors text-sm"
-              >
-                Understanding Metrics
-              </button>
-              <button
-                onClick={() => showInfo('caching')}
-                className="text-gray-400 hover:text-white transition-colors text-sm"
-              >
+              <button onClick={() => showInfo('caching')} className="hover:text-white">
                 Prefix Caching
               </button>
             </div>
