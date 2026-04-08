@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import RaceTrack from './components/RaceTrack'
 import RaceControls from './components/RaceControls'
 import InfoModal from './components/InfoModal'
+import ThemeToggle from './components/ThemeToggle'
 
 function App() {
   const [isRacing, setIsRacing] = useState(false)
@@ -140,12 +141,15 @@ function App() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setInfoModalOpen(true)}
-              className="glass hover:bg-white/10 transition-all rounded-lg px-4 py-2 text-sm"
-            >
-              <span className="mr-2">ℹ️</span> How It Works
-            </button>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <button
+                onClick={() => setInfoModalOpen(true)}
+                className="glass hover:bg-white/10 transition-all rounded-lg px-4 py-2 text-sm"
+              >
+                <span className="mr-2">ℹ️</span> How It Works
+              </button>
+            </div>
           </div>
         </div>
       </header>
