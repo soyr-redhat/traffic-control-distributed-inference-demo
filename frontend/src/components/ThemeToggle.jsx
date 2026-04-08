@@ -19,10 +19,10 @@ function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="glass hover:bg-white/20 transition-all rounded-lg px-4 py-2 text-sm flex items-center gap-2 font-mono uppercase tracking-wider"
+      className="glass hover:bg-white/20 transition-all rounded-lg px-4 py-2 text-sm flex items-center gap-2 font-mono uppercase tracking-wider relative z-50"
     >
-      <span>{theme === 'dark' ? '☾' : '☀'}</span>
-      <span>{theme === 'dark' ? 'Dark' : 'Light'}</span>
+      <span>{theme === 'dark' ? '☀' : '☾'}</span>
+      <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
     </button>
   )
 }
