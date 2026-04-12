@@ -120,12 +120,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex flex-col relative">
+    <div className="min-h-screen bg-redhat-dark-bg text-redhat-text-primary flex flex-col relative">
       {/* Grid Background */}
       <div className="grid-background" />
 
       {/* Header */}
-      <header className="relative bg-black/50 backdrop-blur-lg border-b border-redhat-red/30 z-10">
+      <header className="relative bg-redhat-dark-surface/50 backdrop-blur-lg border-b border-redhat-grid-line z-10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
