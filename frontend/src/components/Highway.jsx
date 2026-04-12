@@ -200,7 +200,7 @@ const Highway = ({ lanes, vehicles, trafficIntensity, gameMode }) => {
   return (
     <div className="relative">
       <div className="absolute top-4 left-4 glass rounded-lg px-4 py-2 z-10">
-        <div className="text-xs text-gray-400">Highway Traffic</div>
+        <div className="text-xs text-redhat-text-secondary">Highway Traffic</div>
         <div className="text-lg font-semibold text-white">
           {vehicles?.length || 0} vehicles
         </div>

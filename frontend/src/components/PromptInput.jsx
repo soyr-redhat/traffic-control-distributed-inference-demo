@@ -31,7 +31,7 @@ const PromptInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Type your prompt here..."
-        className="w-full h-20 bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-redhat-red/50 focus:border-redhat-red resize-none"
+        className="w-full h-20 bg-redhat-dark-elevated/50 border border-redhat-grid-line rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-redhat-red/50 focus:border-redhat-red resize-none"
         disabled={isLoading}
       />
 
@@ -55,7 +55,7 @@ const PromptInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
         <button
           onClick={handleSend}
           disabled={!prompt.trim() || isLoading}
-          className="bg-redhat-red hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold"
+          className="bg-redhat-red hover:bg-red-700 disabled:bg-redhat-dark-surface disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold"
         >
           🚀 Send
         </button>
@@ -63,7 +63,7 @@ const PromptInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
         <button
           onClick={() => handleBatch(10)}
           disabled={!prompt.trim() || isLoading}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold"
+          className="bg-blue-600 hover:bg-blue-700 disabled:bg-redhat-dark-surface disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold"
         >
           ⚡ Batch
         </button>
@@ -71,7 +71,7 @@ const PromptInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
         <button
           onClick={onStressTest}
           disabled={isLoading}
-          className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold"
+          className="bg-orange-600 hover:bg-orange-700 disabled:bg-redhat-dark-surface disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold"
         >
           🔥 Stress
         </button>
@@ -79,7 +79,7 @@ const PromptInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
         <button
           onClick={onCacheTest}
           disabled={isLoading}
-          className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold"
+          className="bg-purple-600 hover:bg-purple-700 disabled:bg-redhat-dark-surface disabled:cursor-not-allowed transition-colors rounded-lg px-3 py-2 text-sm font-semibold"
         >
           📋 Cache
         </button>
@@ -89,7 +89,7 @@ const PromptInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
       {isLoading && (
         <div className="glass rounded-lg px-3 py-2 flex items-center gap-2 text-xs">
           <div className="w-3 h-3 border-2 border-redhat-red border-t-transparent rounded-full animate-spin" />
-          <span className="text-gray-300">Processing...</span>
+          <span className="text-redhat-text-secondary">Processing...</span>
         </div>
       )}
     </div>

@@ -78,7 +78,7 @@ const ActivityFeed = ({ metrics, lanes }) => {
         </h2>
         <button
           onClick={() => setActivities([])}
-          className="text-xs text-gray-400 hover:text-white transition-colors"
+          className="text-xs text-redhat-text-secondary hover:text-white transition-colors"
         >
           Clear
         </button>
@@ -90,31 +90,31 @@ const ActivityFeed = ({ metrics, lanes }) => {
           <div className="text-2xl font-bold text-redhat-red">
             {metrics.throughput.toFixed(1)}
           </div>
-          <div className="text-xs text-gray-400 mt-1">Tokens/sec</div>
+          <div className="text-xs text-redhat-text-secondary mt-1">Tokens/sec</div>
         </div>
         <div className="glass rounded-lg p-3 text-center">
           <div className="text-2xl font-bold text-green-400">
             {metrics.cacheHitRate.toFixed(0)}%
           </div>
-          <div className="text-xs text-gray-400 mt-1">Cache Hits</div>
+          <div className="text-xs text-redhat-text-secondary mt-1">Cache Hits</div>
         </div>
         <div className="glass rounded-lg p-3 text-center">
           <div className="text-2xl font-bold text-blue-400">
             {metrics.avgLatency.toFixed(2)}s
           </div>
-          <div className="text-xs text-gray-400 mt-1">Avg Latency</div>
+          <div className="text-xs text-redhat-text-secondary mt-1">Avg Latency</div>
         </div>
       </div>
 
       {/* Activity Log */}
       <div className="space-y-2">
-        <div className="text-sm text-gray-400 mb-2">Recent Activity:</div>
+        <div className="text-sm text-redhat-text-secondary mb-2">Recent Activity:</div>
         <div
           ref={feedRef}
           className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
         >
           {activities.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 text-sm">
+            <div className="text-center py-8 text-redhat-text-secondary text-sm">
               No activity yet. Send a prompt to get started!
             </div>
           ) : (
@@ -126,7 +126,7 @@ const ActivityFeed = ({ metrics, lanes }) => {
                 <span className="text-lg flex-shrink-0">{getActivityIcon(activity.type)}</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-gray-200">{activity.message}</div>
-                  <div className="text-xs text-gray-500 mt-1">{activity.timestamp}</div>
+                  <div className="text-xs text-redhat-text-secondary mt-1">{activity.timestamp}</div>
                 </div>
               </div>
             ))
@@ -135,22 +135,22 @@ const ActivityFeed = ({ metrics, lanes }) => {
       </div>
 
       {/* Stats Footer */}
-      <div className="mt-6 pt-4 border-t border-gray-700">
+      <div className="mt-6 pt-4 border-t border-redhat-grid-line">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="text-gray-400">Total Requests:</span>
+            <span className="text-redhat-text-secondary">Total Requests:</span>
             <span className="ml-2 font-semibold text-white">{metrics.totalRequests}</span>
           </div>
           <div>
-            <span className="text-gray-400">Total Tokens:</span>
+            <span className="text-redhat-text-secondary">Total Tokens:</span>
             <span className="ml-2 font-semibold text-white">{metrics.totalTokens.toLocaleString()}</span>
           </div>
           <div>
-            <span className="text-gray-400">Active Replicas:</span>
+            <span className="text-redhat-text-secondary">Active Replicas:</span>
             <span className="ml-2 font-semibold text-green-400">{metrics.activeLanes}/{metrics.totalLanes}</span>
           </div>
           <div>
-            <span className="text-gray-400">Efficiency:</span>
+            <span className="text-redhat-text-secondary">Efficiency:</span>
             <span className="ml-2 font-semibold text-blue-400">
               {metrics.cacheHitRate >= 75 ? 'Excellent' : metrics.cacheHitRate >= 50 ? 'Good' : 'Building...'}
             </span>

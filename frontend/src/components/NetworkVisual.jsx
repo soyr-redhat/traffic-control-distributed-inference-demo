@@ -79,7 +79,7 @@ const ConnectionLine = ({ from, to, isActive, isCacheHit }) => {
 
 const ReplicaNode = ({ replica, x, y, isActive, isCacheHit }) => {
   const getStatusColor = () => {
-    if (replica.status !== 'active') return 'bg-gray-700 border-gray-600'
+    if (replica.status !== 'active') return 'bg-redhat-dark-surface border-redhat-grid-line'
     if (replica.load < 40) return 'bg-green-500/20 border-green-500'
     if (replica.load < 70) return 'bg-yellow-500/20 border-yellow-500'
     return 'bg-red-500/20 border-red-500'
@@ -117,7 +117,7 @@ const ReplicaNode = ({ replica, x, y, isActive, isCacheHit }) => {
       >
         <div className="text-2xl mb-1">{replica.status === 'active' ? '⚡' : '⚫'}</div>
         <div className="text-xs font-bold text-white">{replica.replicaName}</div>
-        <div className="text-xs text-gray-400 mt-1">Q: {replica.currentVehicles}</div>
+        <div className="text-xs text-redhat-text-secondary mt-1">Q: {replica.currentVehicles}</div>
         {isCacheHit && <div className="text-lg mt-1">💚</div>}
       </div>
 
@@ -128,7 +128,7 @@ const ReplicaNode = ({ replica, x, y, isActive, isCacheHit }) => {
       )}
 
       <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28">
-        <div className="h-2 bg-gray-900 rounded-full overflow-hidden border border-gray-700">
+        <div className="h-2 bg-redhat-dark-bg rounded-full overflow-hidden border border-redhat-grid-line">
           <div
             className={`h-full transition-all duration-300 ${getLoadColor()}`}
             style={{ width: `${replica.load}%` }}
@@ -238,11 +238,11 @@ const NetworkVisual = ({ lanes, lastActivity }) => {
               <div className="font-bold text-white mb-1">
                 {lastActivity.cached ? 'Cache Hit!' : 'New Route'}
               </div>
-              <div className="text-xs text-gray-300">
+              <div className="text-xs text-redhat-text-secondary">
                 → {lastActivity.replicaName}
               </div>
               {lastActivity.ttft && (
-                <div className="text-xs text-gray-400 mt-1">
+                <div className="text-xs text-redhat-text-secondary mt-1">
                   TTFT: {lastActivity.ttft.toFixed(3)}s
                 </div>
               )}

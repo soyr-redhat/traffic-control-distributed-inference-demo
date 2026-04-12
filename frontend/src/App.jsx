@@ -133,10 +133,10 @@ function App() {
                 <span className="text-2xl">🏁</span>
               </div>
               <div>
-                <h1 className="text-2xl font-display font-bold text-white">
+                <h1 className="text-2xl font-display font-bold text-redhat-text-primary">
                   Cache Performance Race
                 </h1>
-                <p className="text-gray-400 text-sm">
+                <p className="text-redhat-text-secondary text-sm">
                   See the dramatic speedup from prefix caching
                 </p>
               </div>
@@ -162,7 +162,7 @@ function App() {
             <div className="flex items-center justify-center gap-3">
               <span className="text-3xl">🎉</span>
               <div className="text-center">
-                <div className="text-sm text-gray-400">Performance Improvement</div>
+                <div className="text-sm text-redhat-text-secondary">Performance Improvement</div>
                 <div className="text-3xl font-bold text-green-400">{speedup}x faster</div>
               </div>
               <span className="text-3xl">⚡</span>

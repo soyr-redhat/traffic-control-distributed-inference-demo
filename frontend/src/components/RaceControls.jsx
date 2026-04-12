@@ -38,7 +38,7 @@ const RaceControls = ({ onStartRace, isRacing }) => {
     <div className="space-y-4">
       {/* Preset Prompts */}
       <div>
-        <div className="text-sm font-semibold text-gray-400 mb-3">Quick Start</div>
+        <div className="text-sm font-semibold text-redhat-text-secondary mb-3">Quick Start</div>
         <div className="grid grid-cols-3 gap-3">
           {presetPrompts.map((preset) => (
             <button
@@ -53,7 +53,7 @@ const RaceControls = ({ onStartRace, isRacing }) => {
             >
               <div className="text-3xl mb-2">{preset.icon}</div>
               <div className="text-sm font-semibold mb-1">{preset.label}</div>
-              <div className="text-xs text-gray-500">{preset.description}</div>
+              <div className="text-xs text-redhat-text-secondary">{preset.description}</div>
             </button>
           ))}
         </div>
@@ -61,7 +61,7 @@ const RaceControls = ({ onStartRace, isRacing }) => {
 
       {/* Custom Prompt */}
       <div>
-        <div className="text-sm font-semibold text-gray-400 mb-3">Custom Prompt</div>
+        <div className="text-sm font-semibold text-redhat-text-secondary mb-3">Custom Prompt</div>
         <div className="glass rounded-2xl p-2">
           <div className="flex items-end gap-2">
             <div className="flex-1">
@@ -85,7 +85,7 @@ const RaceControls = ({ onStartRace, isRacing }) => {
                 flex-shrink-0 rounded-xl px-6 py-3 font-semibold transition-all
                 ${customPrompt.trim() && !isRacing
                   ? 'bg-redhat-red hover:bg-red-700 text-white'
-                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  : 'bg-redhat-dark-surface text-redhat-text-secondary cursor-not-allowed'
                 }
               `}
             >
@@ -101,7 +101,7 @@ const RaceControls = ({ onStartRace, isRacing }) => {
           <div className="text-2xl">💡</div>
           <div className="flex-1">
             <div className="font-semibold mb-1">How it works</div>
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-redhat-text-secondary">
               The same prompt runs twice: once with a cold start (no cache) and once with prefix caching enabled.
               Watch the dramatic performance difference! Cache hits are typically <strong className="text-green-400">30x faster</strong>.
             </div>

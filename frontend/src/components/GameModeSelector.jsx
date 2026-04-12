@@ -71,7 +71,7 @@ const GameModeSelector = ({ currentMode, onModeChange }) => {
             <div className="relative z-10">
               <div className="text-3xl mb-2">{mode.icon}</div>
               <div className="text-sm font-semibold mb-1">{mode.name}</div>
-              <div className="text-xs text-gray-400">{mode.description}</div>
+              <div className="text-xs text-redhat-text-secondary">{mode.description}</div>
             </div>
           </button>
         ))}
@@ -87,7 +87,7 @@ const GameModeSelector = ({ currentMode, onModeChange }) => {
           </div>
           <button
             onClick={() => onModeChange(null)}
-            className="text-xs text-gray-400 hover:text-white transition-colors"
+            className="text-xs text-redhat-text-secondary hover:text-white transition-colors"
           >
             Stop Mode
           </button>

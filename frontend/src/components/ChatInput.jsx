@@ -40,7 +40,7 @@ const ChatInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
       {/* Quick Actions */}
       {showActions && (
         <div className="mb-3 glass rounded-2xl p-4 animate-fadeIn">
-          <div className="text-xs text-gray-400 mb-3">Quick Actions</div>
+          <div className="text-xs text-redhat-text-secondary mb-3">Quick Actions</div>
           <div className="grid grid-cols-4 gap-2">
             <button
               onClick={() => handleBatch(10)}
@@ -49,7 +49,7 @@ const ChatInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
             >
               <div className="text-2xl mb-1">⚡</div>
               <div className="text-xs font-semibold">Batch 10</div>
-              <div className="text-xs text-gray-500 mt-1">Send 10x</div>
+              <div className="text-xs text-redhat-text-secondary mt-1">Send 10x</div>
             </button>
             <button
               onClick={onStressTest}
@@ -58,7 +58,7 @@ const ChatInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
             >
               <div className="text-2xl mb-1">🔥</div>
               <div className="text-xs font-semibold">Stress Test</div>
-              <div className="text-xs text-gray-500 mt-1">50 requests</div>
+              <div className="text-xs text-redhat-text-secondary mt-1">50 requests</div>
             </button>
             <button
               onClick={onCacheTest}
@@ -67,7 +67,7 @@ const ChatInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
             >
               <div className="text-2xl mb-1">📋</div>
               <div className="text-xs font-semibold">Cache Test</div>
-              <div className="text-xs text-gray-500 mt-1">A-B-A pattern</div>
+              <div className="text-xs text-redhat-text-secondary mt-1">A-B-A pattern</div>
             </button>
             <button
               onClick={() => setShowActions(false)}
@@ -102,7 +102,7 @@ const ChatInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
           {/* Actions Button */}
           <button
             onClick={() => setShowActions(!showActions)}
-            className="flex-shrink-0 w-10 h-10 rounded-full glass hover:bg-white/10 transition-all flex items-center justify-center text-gray-400 hover:text-white"
+            className="flex-shrink-0 w-10 h-10 rounded-full glass hover:bg-white/10 transition-all flex items-center justify-center text-redhat-text-secondary hover:text-white"
             title="Quick Actions"
           >
             <span className="text-xl">+</span>
@@ -138,7 +138,7 @@ const ChatInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
               transition-all
               ${prompt.trim() && !isLoading
                 ? 'bg-redhat-red hover:bg-red-700 text-white'
-                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                : 'bg-redhat-dark-surface text-redhat-text-secondary cursor-not-allowed'
               }
             `}
           >
@@ -152,7 +152,7 @@ const ChatInput = ({ onSendPrompt, onBatch, onStressTest, onCacheTest }) => {
       </div>
 
       {/* Helper Text */}
-      <div className="mt-2 text-center text-xs text-gray-500">
+      <div className="mt-2 text-center text-xs text-redhat-text-secondary">
         Press Enter to send, Shift+Enter for new line
       </div>
     </div>

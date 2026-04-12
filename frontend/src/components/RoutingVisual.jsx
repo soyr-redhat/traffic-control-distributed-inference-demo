@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 const ReplicaCard = ({ replica, isActive, isCacheHit }) => {
   const getStatusColor = () => {
-    if (replica.status !== 'active') return 'bg-gray-700'
+    if (replica.status !== 'active') return 'bg-redhat-dark-surface'
     if (replica.load < 40) return 'bg-green-500'
     if (replica.load < 70) return 'bg-yellow-500'
     return 'bg-red-500'
@@ -38,11 +38,11 @@ const ReplicaCard = ({ replica, isActive, isCacheHit }) => {
 
         {/* Load Bar */}
         <div className="mb-2">
-          <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+          <div className="flex items-center justify-between text-xs text-redhat-text-secondary mb-1">
             <span>Load</span>
             <span>{replica.load.toFixed(0)}%</span>
           </div>
-          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-2 bg-redhat-dark-surface rounded-full overflow-hidden">
             <div
               className={`h-full ${getStatusColor()} transition-all duration-300`}
               style={{ width: `${replica.load}%` }}
@@ -51,7 +51,7 @@ const ReplicaCard = ({ replica, isActive, isCacheHit }) => {
         </div>
 
         {/* Queue Depth */}
-        <div className="text-xs text-gray-400 flex items-center justify-between">
+        <div className="text-xs text-redhat-text-secondary flex items-center justify-between">
           <span>Queue:</span>
           <span className="font-semibold text-white">{replica.currentVehicles}</span>
         </div>
@@ -63,7 +63,7 @@ const ReplicaCard = ({ replica, isActive, isCacheHit }) => {
           ) : replica.status === 'scaling' ? (
             <span className="text-yellow-400">● Scaling...</span>
           ) : (
-            <span className="text-gray-500">● Closed</span>
+            <span className="text-redhat-text-secondary">● Closed</span>
           )}
         </div>
 
@@ -105,7 +105,7 @@ const RoutingVisual = ({ lanes, lastActivity }) => {
           <span className="text-redhat-red">📊</span> Routing Visualization
         </h2>
         <button
-          className="text-gray-400 hover:text-white transition-colors text-sm"
+          className="text-redhat-text-secondary hover:text-white transition-colors text-sm"
           title="Learn how routing works"
         >
           <span className="text-lg">ℹ️</span>
@@ -117,14 +117,14 @@ const RoutingVisual = ({ lanes, lastActivity }) => {
         {/* Your Prompt */}
         <div className="text-center mb-4">
           <div className="inline-block glass rounded-lg px-6 py-3">
-            <div className="text-sm text-gray-400 mb-1">YOUR PROMPT</div>
+            <div className="text-sm text-redhat-text-secondary mb-1">YOUR PROMPT</div>
             <div className="font-semibold">✍️ Text Input</div>
           </div>
         </div>
 
         {/* Arrow Down */}
         <div className="flex justify-center mb-4">
-          <div className="text-2xl text-gray-600 animate-bounce">↓</div>
+          <div className="text-2xl text-redhat-text-tertiary animate-bounce">↓</div>
         </div>
 
         {/* Smart Router */}
@@ -143,7 +143,7 @@ const RoutingVisual = ({ lanes, lastActivity }) => {
 
         {/* Arrow Down */}
         <div className="flex justify-center mb-6">
-          <div className="text-2xl text-gray-600">↓</div>
+          <div className="text-2xl text-redhat-text-tertiary">↓</div>
         </div>
 
         {/* Replicas Grid */}

@@ -35,10 +35,10 @@ const MetricsPanel = ({ metrics, lanes }) => {
         </h2>
         <div className="grid grid-cols-2 gap-4">
           {metricsData.map((metric) => (
-            <div key={metric.label} className="bg-gray-800/50 rounded-lg p-4">
+            <div key={metric.label} className="bg-redhat-dark-elevated/50 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-2xl">{metric.icon}</span>
-                <span className="text-xs text-gray-400">{metric.label}</span>
+                <span className="text-xs text-redhat-text-secondary">{metric.label}</span>
               </div>
               <div className={`text-2xl font-bold ${metric.color}`}>
                 {metric.value}
@@ -55,19 +55,19 @@ const MetricsPanel = ({ metrics, lanes }) => {
         </h2>
         <div className="space-y-3">
           {lanes.map((lane, index) => (
-            <div key={lane.id} className="bg-gray-800/50 rounded-lg p-4">
+            <div key={lane.id} className="bg-redhat-dark-elevated/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className={`w-3 h-3 rounded-full ${
                     lane.status === 'active' ? 'bg-green-500' :
                     lane.status === 'scaling' ? 'bg-yellow-500 animate-pulse' :
-                    'bg-gray-500'
+                    'bg-redhat-dark-bg0'
                   }`} />
                   <span className="font-semibold">
                     {index === 3 ? 'HOV (Cache)' : `Lane ${index + 1}`}
                   </span>
                 </div>
-                <div className="text-sm text-gray-400">
+                <div className="text-sm text-redhat-text-secondary">
                   {lane.status === 'active' ? `${lane.requestsPerSec} req/s` :
                    lane.status === 'scaling' ? 'Scaling...' : 'Closed'}
                 </div>
@@ -75,7 +75,7 @@ const MetricsPanel = ({ metrics, lanes }) => {
 
               {/* Load bar */}
               {lane.status === 'active' && (
-                <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-redhat-dark-surface rounded-full h-2 overflow-hidden">
                   <div
                     className={`h-full transition-all duration-300 ${
                       lane.load > 80 ? 'bg-red-500' :

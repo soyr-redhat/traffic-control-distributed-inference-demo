@@ -96,13 +96,13 @@ const InfoModal = ({ isOpen, onClose, topic }) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+      <div className="bg-redhat-dark-bg border border-redhat-grid-line rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-gray-900 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-redhat-dark-bg border-b border-redhat-grid-line px-6 py-4 flex items-center justify-between">
           <h2 className="text-2xl font-display font-bold">{data.title}</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors text-2xl"
+            className="text-redhat-text-secondary hover:text-white transition-colors text-2xl"
           >
             ×
           </button>
@@ -115,7 +115,7 @@ const InfoModal = ({ isOpen, onClose, topic }) => {
               <h3 className="font-semibold text-lg mb-2 text-redhat-red">
                 {section.title}
               </h3>
-              <p className="text-gray-300 text-sm whitespace-pre-line leading-relaxed">
+              <p className="text-redhat-text-secondary text-sm whitespace-pre-line leading-relaxed">
                 {section.content}
               </p>
             </div>
@@ -123,7 +123,7 @@ const InfoModal = ({ isOpen, onClose, topic }) => {
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-900 border-t border-gray-700 px-6 py-4">
+        <div className="sticky bottom-0 bg-redhat-dark-bg border-t border-redhat-grid-line px-6 py-4">
           <button
             onClick={onClose}
             className="w-full bg-redhat-red hover:bg-red-700 transition-colors rounded-lg px-4 py-3 font-semibold"

@@ -24,7 +24,7 @@ const ControlPanel = ({ trafficIntensity, onIntensityChange, onSpawnVehicle }) =
         {/* Traffic Intensity Slider */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-semibold text-gray-300">Traffic Intensity</label>
+            <label className="text-sm font-semibold text-redhat-text-secondary">Traffic Intensity</label>
             <span className="text-2xl font-bold text-redhat-red">{trafficIntensity}%</span>
           </div>
 
@@ -34,7 +34,7 @@ const ControlPanel = ({ trafficIntensity, onIntensityChange, onSpawnVehicle }) =
             max="100"
             value={trafficIntensity}
             onChange={(e) => onIntensityChange(parseInt(e.target.value))}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-redhat-red"
+            className="w-full h-2 bg-redhat-dark-surface rounded-lg appearance-none cursor-pointer accent-redhat-red"
           />
 
           {/* Presets */}
@@ -54,7 +54,7 @@ const ControlPanel = ({ trafficIntensity, onIntensityChange, onSpawnVehicle }) =
 
         {/* Vehicle Spawner */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-300 mb-3">Spawn Vehicles</h3>
+          <h3 className="text-sm font-semibold text-redhat-text-secondary mb-3">Spawn Vehicles</h3>
           <div className="grid grid-cols-2 gap-2">
             {vehicleTypes.map((vehicle) => (
               <button
@@ -66,7 +66,7 @@ const ControlPanel = ({ trafficIntensity, onIntensityChange, onSpawnVehicle }) =
                   <span className="text-2xl">{vehicle.icon}</span>
                   <span className="font-semibold text-sm">{vehicle.name}</span>
                 </div>
-                <div className="text-xs text-gray-400">{vehicle.description}</div>
+                <div className="text-xs text-redhat-text-secondary">{vehicle.description}</div>
                 <div className={`h-1 ${vehicle.color} rounded-full mt-2 opacity-50 group-hover:opacity-100 transition-opacity`} />
               </button>
             ))}
@@ -87,7 +87,7 @@ const ControlPanel = ({ trafficIntensity, onIntensityChange, onSpawnVehicle }) =
         </button>
         <button
           onClick={() => onIntensityChange(0)}
-          className="flex-1 bg-gray-700 hover:bg-gray-600 transition-colors rounded-lg px-4 py-3 font-semibold"
+          className="flex-1 bg-redhat-dark-surface hover:bg-gray-600 transition-colors rounded-lg px-4 py-3 font-semibold"
         >
           🛑 Clear Traffic
         </button>
