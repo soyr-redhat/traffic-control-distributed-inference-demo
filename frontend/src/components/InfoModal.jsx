@@ -102,7 +102,7 @@ const InfoModal = ({ isOpen, onClose, topic }) => {
           <h2 className="text-2xl font-display font-bold">{data.title}</h2>
           <button
             onClick={onClose}
-            className="text-redhat-text-secondary hover:text-white transition-colors text-2xl"
+            className="text-redhat-text-secondary hover:text-redhat-text-primary transition-colors text-2xl"
           >
             ×
           </button>

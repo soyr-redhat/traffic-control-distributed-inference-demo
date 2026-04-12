@@ -105,7 +105,7 @@ const RoutingVisual = ({ lanes, lastActivity }) => {
           <span className="text-redhat-red">📊</span> Routing Visualization
         </h2>
         <button
-          className="text-redhat-text-secondary hover:text-white transition-colors text-sm"
+          className="text-redhat-text-secondary hover:text-redhat-text-primary transition-colors text-sm"
           title="Learn how routing works"
         >
           <span className="text-lg">ℹ️</span>

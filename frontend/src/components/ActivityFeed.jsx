@@ -78,7 +78,7 @@ const ActivityFeed = ({ metrics, lanes }) => {
         </h2>
         <button
           onClick={() => setActivities([])}
-          className="text-xs text-redhat-text-secondary hover:text-white transition-colors"
+          className="text-xs text-redhat-text-secondary hover:text-redhat-text-primary transition-colors"
         >
           Clear
         </button>

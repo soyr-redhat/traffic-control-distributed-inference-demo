@@ -87,7 +87,7 @@ const GameModeSelector = ({ currentMode, onModeChange }) => {
           </div>
           <button
             onClick={() => onModeChange(null)}
-            className="text-xs text-redhat-text-secondary hover:text-white transition-colors"
+            className="text-xs text-redhat-text-secondary hover:text-redhat-text-primary transition-colors"
           >
             Stop Mode
           </button>
